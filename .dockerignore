@@ -1,0 +1,17 @@
+# Ignore git and ide configuration
+.git
+.gitignore
+.idea
+.vscode
+*.iml
+
+# Ignore build output
+target/
+
+# Ignore wrappers and temporary files we don't need in the final build context
+mvnw.cmd
+.mvn/wrapper/maven-wrapper.jar
+
+# Ignore docker files themselves
+Dockerfile
+.dockerignore
