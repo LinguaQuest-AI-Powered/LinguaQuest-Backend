@@ -15,6 +15,6 @@ public class PathsConfig {
 
     @Bean("privatePaths")
     List<String> privatePaths() {
-        return List.of("");
+        return List.of("/api/**");
     }
 }

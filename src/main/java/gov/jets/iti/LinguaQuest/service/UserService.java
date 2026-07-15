@@ -16,7 +16,7 @@ public class UserService {
     }
 
     public void markEmailVerified(String email){
-        userRepository.markEmailVerified(email);
+        //userRepository.markEmailVerified(email);
     }
 
 }

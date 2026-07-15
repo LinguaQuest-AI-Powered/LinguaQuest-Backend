@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -22,17 +23,25 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 import java.util.List;
 
-@RequiredArgsConstructor
+@Component
 public class JwtValidationFilter extends OncePerRequestFilter {
 
-    @Qualifier("publicPaths")
     private final List<String> publicPaths;
-    private final AntPathMatcher antPathMatcher;
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
-
-    @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver resolver;
+
+    public JwtValidationFilter(
+            @Qualifier("publicPaths") List<String> publicPaths,
+            JwtUtil jwtUtil,
+            CustomUserDetailsService customUserDetailsService,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.publicPaths = publicPaths;
+        this.jwtUtil = jwtUtil;
+        this.customUserDetailsService = customUserDetailsService;
+        this.resolver = resolver;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
