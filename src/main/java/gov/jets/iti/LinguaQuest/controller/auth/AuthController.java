@@ -2,22 +2,16 @@ package gov.jets.iti.LinguaQuest.controller.auth;
 
 
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
-import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
-import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
-import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.auth.EmailNotVerifiedException;
-import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
+import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
+import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.service.AuthService;
-import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,12 +24,32 @@ public class AuthController {
 
     final private AuthService authService;
 
+    @PostMapping(value = "/register",version = "v1")
+    public ResponseEntity<SuccessResponse<RegisterResponseDto>> register(@RequestBody @Valid RegisterRequestDto registerRequestDto) {
+        RegisterResponseDto responseDto = authService.register(registerRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new SuccessResponse<>(true,responseDto));
+    }
+
     @PostMapping(value = "/login",version = "v1")
     public ResponseEntity<SuccessResponse<AuthResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
         AuthResponseDto authResponseDto = authService.login(loginRequestDto);
         return ResponseEntity.ok(new SuccessResponse<>(true,authResponseDto));
     }
 
+
+    @ExceptionHandler(TargetLanguageNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleTargetLanguageNotSupportedException(TargetLanguageNotSupportedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_SUPPORTED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "USERNAME_ALREADY_EXISTS", ex.getMessage(), request);
+    }
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_FAILURE", ex.getMessage(), request);
