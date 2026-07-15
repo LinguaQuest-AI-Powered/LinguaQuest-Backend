@@ -8,12 +8,12 @@ import java.util.List;
 @Configuration
 public class PathsConfig {
 
-    @Bean
+    @Bean("publicPaths")
     List<String> publicPaths() {
         return List.of("/api/v1/auth/login");
     }
 
-    @Bean
+    @Bean("privatePaths")
     List<String> privatePaths() {
         return List.of("");
     }

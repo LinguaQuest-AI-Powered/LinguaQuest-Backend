@@ -7,6 +7,7 @@ import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
 import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotVerifiedException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.service.AuthService;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
@@ -37,7 +38,11 @@ public class AuthController {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.TOO_MANY_REQUESTS, "AUTHENTICATION_FAILURE", ex.getMessage(), request);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_FAILURE", ex.getMessage(), request);
+    }
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleEmailNotVerifiedException(EmailNotVerifiedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, "EMAIL_NOT_VERIFIED", ex.getMessage(), request);
     }
     @ExceptionHandler({BadCredentialsException.class, EmailNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationExceptions(

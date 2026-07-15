@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.service;
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotVerifiedException;
 import gov.jets.iti.LinguaQuest.util.ApplicationConstants;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
@@ -24,6 +25,9 @@ public class AuthService {
         var resultAuth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.email(),loginRequestDto.password()));
 
         UserPrinciple userPrinciple = (UserPrinciple) resultAuth.getPrincipal();
+        if(!userPrinciple.user().getIsVerified()) {
+            throw new EmailNotVerifiedException("Please verify your email before logging in");
+        }
         String jwtToken = jwtUtil.generateToken(userPrinciple);
         UserDto userDto = mapUserPrincipleToUserDto(userPrinciple);
         return new AuthResponseDto(jwtToken,"","Barear", 86400000L,userDto);
