@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.entity;
 
+import gov.jets.iti.LinguaQuest.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -65,6 +66,8 @@ public class User {
 
     @Column(name = "reset_token")
     private String resetToken;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Column(name = "reset_token_expires_at")
     private LocalDateTime resetTokenExpiresAt;
