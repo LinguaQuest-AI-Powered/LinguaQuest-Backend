@@ -17,6 +17,11 @@ import gov.jets.iti.LinguaQuest.util.ApplicationConstants;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
+import gov.jets.iti.LinguaQuest.dto.request.OtpSendRequest;
+import gov.jets.iti.LinguaQuest.dto.request.OtpVerifyRequest;
+import gov.jets.iti.LinguaQuest.entity.OtpPurpose;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +41,8 @@ public class AuthService {
     final private UserRepository userRepository;
     final private TargetLanguageRepository targetLanguageRepository;
     final private PasswordEncoder passwordEncoder;
-
+    private final UserService userService;
+    private final OtpService otpService;
     @Transactional
     public RegisterResponseDto register(RegisterRequestDto registerRequestDto){
         if(userRepository.existsByEmail(registerRequestDto.email())) {
@@ -63,6 +69,7 @@ public class AuthService {
         return mapUserToRegisterResponseDto(user);
     }
 
+
     public AuthResponseDto login(LoginRequestDto loginRequestDto) {
 
         var resultAuth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.email(),loginRequestDto.password()));
@@ -87,5 +94,30 @@ public class AuthService {
                 user.getNativeLanguage(),user.getTargetLanguages().stream().toList().get(0).getName(),
                 user.getIsVerified());
     }
+    public void sendOtp(OtpSendRequest request) {
+        validateEmailExists(request.email());
 
+        otpService.generateAndSendOtp(
+                request.email(),
+                request.purpose()
+        );
+    }
+
+    public void verifyOtp(OtpVerifyRequest request) {
+        validateEmailExists(request.email());
+
+        otpService.verifyOtp(
+                request.email(),
+                OtpPurpose.SIGNUP,
+                request.otp()
+        );
+
+        userService.markEmailVerified(request.email());
+    }
+
+    private void validateEmailExists(String email) {
+        if (!userService.existsByEmail(email)) {
+            throw new EmailNotFoundException("Email not found");
+        }
+    }
 }
