@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain customizeFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain customizeFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(c -> c.disable())
                 .formLogin(f->f.disable())
