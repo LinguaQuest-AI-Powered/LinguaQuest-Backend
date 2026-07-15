@@ -2,6 +2,9 @@ package gov.jets.iti.LinguaQuest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.PasswordManagementDsl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +24,10 @@ public class SecurityConfig {
                 .build();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationProvider authenticationProvider) {
+        return new ProviderManager(authenticationProvider);
+    }
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
