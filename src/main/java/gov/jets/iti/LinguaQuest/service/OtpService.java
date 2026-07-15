@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.service;
 
 import gov.jets.iti.LinguaQuest.entity.OtpPurpose;
 import gov.jets.iti.LinguaQuest.entity.Otp;
+import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
@@ -47,7 +48,7 @@ public class OtpService {
         mailService.sendOtpEmail(email, otp);
     }
 
-    public boolean verifyOtp(String email, OtpPurpose purpose, String submittedOtp) {
+    public void verifyOtp(String email, OtpPurpose purpose, String submittedOtp) {
         String otpKey = "otp:" + purpose + ":" + email;
         Otp record = otpRedisTemplate.opsForValue().get(otpKey);
 
@@ -63,7 +64,7 @@ public class OtpService {
 
         if (matches) {
             otpRedisTemplate.delete(otpKey);
-            return true;
+            return;
         }
 
         Long ttl = otpRedisTemplate.getExpire(otpKey, TimeUnit.SECONDS);
@@ -72,7 +73,7 @@ public class OtpService {
                 new Otp(record.hashedOtp(), record.attempts() + 1, record.generatedAt()),
                 Duration.ofSeconds(ttl)
         );
-        return false;
+        throw new InvalidOtpException("Wrong OTP");
     }
 
     private String generateNumericOtp() {
