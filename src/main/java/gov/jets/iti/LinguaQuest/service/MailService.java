@@ -106,7 +106,7 @@ public class MailService {
                     <br><br>
     
                     If you didn't request this email,
-                    you can safely ignore this it.
+                    you can safely ignore this.
     
                     </p>
     
