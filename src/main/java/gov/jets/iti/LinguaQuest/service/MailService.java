@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -22,8 +23,7 @@ public class MailService {
         try {
 
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
-
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(email);
             helper.setSubject("Verify your LinguaQuest account");
 
@@ -50,14 +50,20 @@ public class MailService {
     
                     <tr>
                     <td align="center" style="padding:40px 40px 20px;">
-    
+                    
+                    <img
+                        src="cid:lingoImage"
+                        alt="Verify your email"
+                        width="140"
+                        style="display:block;margin:0 auto 20px auto;">
+                    
                     <h1 style="margin:20px 0 10px;
                                color:#9C5A00;
                                font-size:34px;
                                font-weight:bold;">
-    
+                    
                     Verify your email
-    
+                    
                     </h1>
     
                     <p style="margin:0;
@@ -133,8 +139,11 @@ public class MailService {
                     </body>
                     </html>
                     """;
-
             helper.setText(html, true);
+            helper.addInline(
+                    "lingoImage",
+                    new ClassPathResource("images/lingo_mail.png")
+            );
             helper.setText(html.formatted(buildOtpBoxes(otp)), true);
             mailSender.send(message);
         } catch (MessagingException e) {
