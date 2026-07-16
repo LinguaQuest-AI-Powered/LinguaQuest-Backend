@@ -14,6 +14,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByEmail(String email);
 
+    Optional<User> findByFirebaseUid(String firebaseUid);
+
     @Modifying
     @Query("UPDATE User u SET u.isVerified = true WHERE u.email = :email")
     void markEmailVerified(@Param("email") String email);
