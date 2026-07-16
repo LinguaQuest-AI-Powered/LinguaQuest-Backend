@@ -29,6 +29,14 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(name = "firebase_uid", unique = true)
+    private String firebaseUid;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sign_in_provider", nullable = false)
+    @Builder.Default
+    private SignInProvider signInProvider = SignInProvider.LOCAL;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -58,6 +66,10 @@ public class User {
     @Builder.Default
     private Boolean isVerified = false;
 
+    @Column(name = "profile_complete", nullable = false)
+    @Builder.Default
+    private boolean profileComplete = false;
+
     @Column(nullable = false)
     @Builder.Default
     private Integer level = 1;
@@ -80,6 +92,7 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 
     @Override
     public boolean equals(Object o) {
