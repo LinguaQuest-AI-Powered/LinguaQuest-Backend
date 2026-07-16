@@ -77,13 +77,8 @@ public class User {
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
 
-    @Column(name = "reset_token")
-    private String resetToken;
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @Column(name = "reset_token_expires_at")
-    private LocalDateTime resetTokenExpiresAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

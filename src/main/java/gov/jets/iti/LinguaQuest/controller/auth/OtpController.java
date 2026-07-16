@@ -33,7 +33,7 @@ public class OtpController {
     public ResponseEntity<SuccessResponse<OtpVerifyResponse>> verifyOtp(
             @Valid @RequestBody OtpVerifyRequest request) {
 
-        authService.verifyOtp(request);
+        authService.verifySignupOtp(request);
 
         return ResponseEntity.ok(
                 new SuccessResponse<>(true, new OtpVerifyResponse(true))
