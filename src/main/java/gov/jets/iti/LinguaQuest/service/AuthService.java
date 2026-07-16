@@ -5,6 +5,7 @@ import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.RegisterResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
+import gov.jets.iti.LinguaQuest.entity.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.TargetLanguage;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
@@ -61,6 +62,8 @@ public class AuthService {
                 .username(registerRequestDto.username())
                 .email(registerRequestDto.email())
                 .isVerified(false)
+                .signInProvider(SignInProvider.LOCAL)
+                .profileComplete(true)
                 .password(passwordEncoder.encode(registerRequestDto.password()))
                 .nativeLanguage(registerRequestDto.nativeLanguage())
                 .targetLanguages(targetLanguageSet)
