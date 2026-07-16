@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.exception;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -63,6 +64,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred", request);
+    }
+
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_RESET_TOKEN", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
