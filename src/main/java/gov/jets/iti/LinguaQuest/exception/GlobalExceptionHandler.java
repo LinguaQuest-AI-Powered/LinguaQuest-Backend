@@ -3,6 +3,8 @@ package gov.jets.iti.LinguaQuest.exception;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
+import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -58,6 +60,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> handleExpiredJwt(ExpiredJwtException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED", "Your session has expired. Please log in again.", request);
+    }
+
+    @ExceptionHandler(InvalidFirebaseTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFirebaseToken(InvalidFirebaseTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_FIREBASE_TOKEN", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)
