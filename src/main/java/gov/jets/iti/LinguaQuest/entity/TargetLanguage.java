@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class TargetLanguage {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
+    @JsonValue
     private String name;
 
     @Column(unique = true, length = 5)

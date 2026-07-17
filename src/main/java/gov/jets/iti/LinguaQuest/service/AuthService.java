@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.service;
 
+import gov.jets.iti.LinguaQuest.Role;
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
@@ -64,6 +65,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(registerRequestDto.password()))
                 .nativeLanguage(registerRequestDto.nativeLanguage())
                 .targetLanguages(targetLanguageSet)
+                .role(Role.ROLE_USER)
                 .build();
         userRepository.save(user);
         return mapUserToRegisterResponseDto(user);
