@@ -18,6 +18,12 @@ public class UserService {
 
     @Transactional
     public void markEmailVerified(String email){
-        //userRepository.markEmailVerified(email);
+        userRepository.markEmailVerified(email);
+    }
+
+    @Transactional
+    public void updatePassword(User user, String encodedPassword) {
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
     }
 }

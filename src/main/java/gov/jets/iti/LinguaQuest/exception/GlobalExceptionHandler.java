@@ -3,6 +3,9 @@ package gov.jets.iti.LinguaQuest.exception;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
 import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
+import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
+import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -60,9 +63,24 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED", "Your session has expired. Please log in again.", request);
     }
 
+    @ExceptionHandler(InvalidFirebaseTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFirebaseToken(InvalidFirebaseTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_FIREBASE_TOKEN", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred", request);
+    }
+
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_RESET_TOKEN", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
