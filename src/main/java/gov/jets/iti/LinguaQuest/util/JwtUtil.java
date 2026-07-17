@@ -74,4 +74,8 @@ public class JwtUtil {
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    public Long getExpirationMs() {
+        return expirationMs;
+    }
 }

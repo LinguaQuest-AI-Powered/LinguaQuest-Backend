@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.controller.auth;
 
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
+import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.service.AuthService;
@@ -34,6 +35,12 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<AuthResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
         AuthResponseDto authResponseDto = authService.login(loginRequestDto);
         return ResponseEntity.ok(new SuccessResponse<>(true,authResponseDto));
+    }
+
+    @PostMapping(value = "/refresh-token", version = "v1")
+    public ResponseEntity<SuccessResponse<RefreshTokenResponseDto>> refreshToken(@RequestBody @Valid RefreshTokenRequestDto request) {
+        RefreshTokenResponseDto responseDto = authService.refreshToken(request);
+        return ResponseEntity.ok(new SuccessResponse<>(true, responseDto));
     }
 
 

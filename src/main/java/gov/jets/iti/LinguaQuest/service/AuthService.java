@@ -8,6 +8,8 @@ import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.PasswordResetOtpVerifyResponse;
 import gov.jets.iti.LinguaQuest.dto.response.RegisterResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
+import gov.jets.iti.LinguaQuest.dto.response.RefreshTokenResponseDto;
+import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.entity.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.TargetLanguage;
 import gov.jets.iti.LinguaQuest.entity.User;
@@ -45,6 +47,7 @@ public class AuthService {
     private final UserService userService;
     private final OtpService otpService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final RefreshTokenService refreshTokenService;
 
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final String RESET_TOKEN_PREFIX = "reset-token:";
@@ -88,9 +91,22 @@ public class AuthService {
             throw new EmailNotVerifiedException("Please verify your email before logging in");
         }
         String jwtToken = jwtUtil.generateToken(userPrinciple);
+        String refreshToken = refreshTokenService.createRefreshToken(userPrinciple.user());
         UserDto userDto = mapUserPrincipleToUserDto(userPrinciple);
-        return new AuthResponseDto(jwtToken, "", "Barear", 86400000L, userDto);
+        return new AuthResponseDto(jwtToken, refreshToken, "Bearer", jwtUtil.getExpirationMs(), userDto);
 
+    }
+
+    public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request) {
+        RefreshTokenService.TokenRotationResult rotationResult = refreshTokenService.validateAndRotate(request.refreshToken());
+        UserPrinciple userPrinciple = new UserPrinciple(rotationResult.user());
+        String newAccessToken = jwtUtil.generateToken(userPrinciple);
+        return new RefreshTokenResponseDto(
+                newAccessToken,
+                rotationResult.newRawRefreshToken(),
+                "Bearer",
+                jwtUtil.getExpirationMs()
+        );
     }
 
     private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
