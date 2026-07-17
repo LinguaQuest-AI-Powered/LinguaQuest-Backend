@@ -1,6 +1,6 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.Role;
+import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
@@ -14,7 +14,6 @@ import gov.jets.iti.LinguaQuest.exception.auth.TargetLanguageNotSupportedExcepti
 import gov.jets.iti.LinguaQuest.exception.auth.UsernameAlreadyExistsException;
 import gov.jets.iti.LinguaQuest.repository.TargetLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
-import gov.jets.iti.LinguaQuest.util.ApplicationConstants;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
@@ -24,9 +23,7 @@ import gov.jets.iti.LinguaQuest.entity.OtpPurpose;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

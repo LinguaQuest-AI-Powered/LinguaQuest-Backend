@@ -1,6 +1,6 @@
 package gov.jets.iti.LinguaQuest.entity;
 
-import gov.jets.iti.LinguaQuest.Role;
+import gov.jets.iti.LinguaQuest.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
