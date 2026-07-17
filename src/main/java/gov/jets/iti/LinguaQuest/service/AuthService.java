@@ -152,13 +152,6 @@ public class AuthService {
         }
     }
 
-    private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
-        return new UserDto(userPrinciple.user().getId(), userPrinciple.user().getUsername(), userPrinciple.user().getPhoto(), userPrinciple.user().getNativeLanguage(), userPrinciple.user().getIsVerified(), userPrinciple.user().getTargetLanguages());
-    }
-
-    private RegisterResponseDto mapUserToRegisterResponseDto(User user) {
-        return new RegisterResponseDto(user.getId(), user.getEmail(), user.getUsername(), user.getNativeLanguage(), user.getTargetLanguages().stream().toList().get(0).getName(), user.getIsVerified());
-    }
 
     private String generateResetToken() {
         byte[] bytes = new byte[32];

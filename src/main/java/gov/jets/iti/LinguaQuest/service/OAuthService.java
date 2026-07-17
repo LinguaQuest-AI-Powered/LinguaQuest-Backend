@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import com.google.firebase.auth.FirebaseToken;
-import gov.jets.iti.LinguaQuest.Role;
+import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.response.OAuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
 import gov.jets.iti.LinguaQuest.entity.SignInProvider;
