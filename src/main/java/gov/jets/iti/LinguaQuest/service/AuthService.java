@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.service;
 
+import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
@@ -33,6 +34,8 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 
@@ -42,7 +45,7 @@ public class AuthService {
     final private AuthenticationManager authenticationManager;
     final private JwtUtil jwtUtil;
     final private UserRepository userRepository;
-    final private LanguageRepository targetLanguageRepository;
+    final private LanguageRepository languageRepository;
     final private PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final OtpService otpService;
@@ -60,20 +63,23 @@ public class AuthService {
         if (userRepository.existsByUsername(registerRequestDto.username())) {
             throw new UsernameAlreadyExistsException("username " + registerRequestDto.username() + " already exists");
         }
-        Language targetLanguage = targetLanguageRepository.findByName(registerRequestDto.targetLanguage());
-        if (targetLanguage == null) {
-            throw new TargetLanguageNotSupportedException("Language " + registerRequestDto.targetLanguage() + "is Not supported");
-        }
-        Set<Language> targetLanguageSet = new HashSet<>();
-        targetLanguageSet.add(targetLanguage);
+        Language targetLanguage = languageRepository.findByName(registerRequestDto.targetLanguage())
+                .orElseThrow(() -> new TargetLanguageNotSupportedException("Language " + registerRequestDto.targetLanguage() + "is Not supported"));
+        UserLanguage userLanguage = UserLanguage.builder()
+                .language(targetLanguage)
+                .build();
+        Set<UserLanguage> targetLanguageSet = new HashSet<>();
+        targetLanguageSet.add(userLanguage);
+        Language nativeLanguage = languageRepository.findByName(registerRequestDto.nativeLanguage())
+                .orElseThrow(() -> new TargetLanguageNotSupportedException("Language " + registerRequestDto.nativeLanguage() + "is Not supported"));
 
         User user = User.builder()
                 .username(registerRequestDto.username())
                 .email(registerRequestDto.email())
                 .isVerified(false)
                 .password(passwordEncoder.encode(registerRequestDto.password()))
-                .nativeLanguage(registerRequestDto.nativeLanguage())
-                .targetLanguages(targetLanguageSet)
+                .nativeLanguage(nativeLanguage)
+                .languages(targetLanguageSet)
                 .role(Role.ROLE_USER)
                 .signInProvider(SignInProvider.LOCAL).profileComplete(true)
                 .build();
@@ -111,12 +117,13 @@ public class AuthService {
 
     private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
         return new UserDto(userPrinciple.user().getId(), userPrinciple.user().getUsername(),userPrinciple.user().getPhoto()
-        ,userPrinciple.user().getNativeLanguage(),userPrinciple.user().getIsVerified(),userPrinciple.user().getTargetLanguages());
+        ,userPrinciple.user().getNativeLanguage().getName(),userPrinciple.user().getIsVerified(),userPrinciple.user()
+                .getLanguages().stream().map((e) -> e.getLanguage()).collect(Collectors.toSet()));
     }
 
     private RegisterResponseDto mapUserToRegisterResponseDto(User user){
         return new RegisterResponseDto(user.getId(), user.getEmail(),user.getUsername(),
-                user.getNativeLanguage(),user.getTargetLanguages().stream().toList().get(0).getName(),
+                user.getNativeLanguage().getName(),user.getLanguages().stream().toList().get(0).getLanguage().getName(),
                 user.getIsVerified());
     }
     public void sendOtp(OtpSendRequest request) {
