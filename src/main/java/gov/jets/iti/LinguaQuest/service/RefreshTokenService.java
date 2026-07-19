@@ -87,6 +87,20 @@ public class RefreshTokenService {
         return new TokenRotationResult(newRawRefreshToken, token.getUser());
     }
 
+    public void revokeRefreshToken(String token,boolean allUserToken) {
+        String tokenHash = hashToken(token);
+        RefreshToken token1 = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new InvalidRefreshTokenException("token " + token + " is invalid"));
+        if (token1.isRevoked()) {
+            throw new InvalidRefreshTokenException("token " + token + " has been revoked");
+        }
+        if(allUserToken) {
+            refreshTokenRepository.revokeAllActiveByUserId(token1.getUser().getId());
+        }else {
+            refreshTokenRepository.revokeActiveByTokenHash(tokenHash);
+        }
+    }
+
     /**
      * Background task to purge expired or revoked refresh tokens.
      * Runs every day at 2 AM.
