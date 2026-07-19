@@ -1,4 +1,4 @@
-package gov.jets.iti.LinguaQuest.entity;
+package gov.jets.iti.LinguaQuest.enums;
 
 public enum OtpPurpose {
     SIGNUP, PASSWORD_RESET

@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseToken;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.response.OAuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
-import gov.jets.iti.LinguaQuest.entity.SignInProvider;
+import gov.jets.iti.LinguaQuest.enums.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;

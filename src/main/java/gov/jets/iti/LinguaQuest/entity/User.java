@@ -1,16 +1,17 @@
 package gov.jets.iti.LinguaQuest.entity;
 
 import gov.jets.iti.LinguaQuest.enums.Role;
+import gov.jets.iti.LinguaQuest.enums.SignInProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
 
 @Entity
 @Table(name = "users")
@@ -24,7 +25,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
@@ -45,22 +45,23 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
+    private Integer coins = 0;
+
+
+    @Column(nullable = false)
+    @Builder.Default
     private Integer xp = 0;
 
     @Column(length = 500)
     private String photo;
 
-    @Column(name = "native_language", length = 50)
-    private String nativeLanguage;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "native_language_id")
+    private Language nativeLanguage;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_target_languages",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "language_id")
-    )
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<TargetLanguage> targetLanguages = new HashSet<>();
+    private Set<UserLanguage> languages = new HashSet<>();
 
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
@@ -73,6 +74,20 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private Integer level = 1;
+
+    @Column(name = "current_streak_days", nullable = false)
+    @Builder.Default
+    private Integer currentStreakDays = 0;
+
+    @Column(name = "current_reward_day", nullable = false)
+    @Builder.Default
+    private Integer currentRewardDay = 1;
+
+    @Column(name = "last_daily_reward_claimed_at")
+    private LocalDate lastDailyRewardClaimedAt;
+
+    @Column(name = "last_weekly_reward_claimed_at")
+    private LocalDate lastWeeklyRewardClaimedAt;
 
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
