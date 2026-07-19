@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Configuration
@@ -20,23 +22,43 @@ public class FirebaseConfig {
     @Value("${firebase.config.path:firebase-service-account.json}")
     private String firebaseConfigPath;
 
+    @Value("${FIREBASE_CREDENTIALS:}")
+    private String firebaseCredentials;
+
     @PostConstruct
     public void initFirebase() {
         if (!FirebaseApp.getApps().isEmpty()) {
             return;
         }
 
-        try (InputStream serviceAccount = new ClassPathResource(firebaseConfigPath).getInputStream()) {
+        try (InputStream serviceAccount = getFirebaseCredentials()) {
+            if (serviceAccount == null) {
+                log.warn("No Firebase credentials found. Set FIREBASE_CREDENTIALS env var or provide '{}' in classpath.", firebaseConfigPath);
+                return;
+            }
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .setHttpTransport(new ApacheHttpTransport())
                     .build();
             FirebaseApp.initializeApp(options);
             log.info("Firebase initialized successfully");
-        } catch (java.io.FileNotFoundException e) {
-            log.warn("Firebase service account credentials file '{}' not found in classpath. Firebase endpoints will throw errors when called.", firebaseConfigPath);
         } catch (IOException e) {
             log.error("Failed to initialize Firebase Admin SDK", e);
         }
     }
+
+    private InputStream getFirebaseCredentials() {
+        if (firebaseCredentials != null && !firebaseCredentials.isBlank()) {
+            log.info("Loading Firebase credentials from FIREBASE_CREDENTIALS property");
+            return new ByteArrayInputStream(firebaseCredentials.getBytes(StandardCharsets.UTF_8));
+        }
+
+        try {
+            log.info("Loading Firebase credentials from classpath: {}", firebaseConfigPath);
+            return new ClassPathResource(firebaseConfigPath).getInputStream();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 }
+
