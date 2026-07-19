@@ -2,6 +2,7 @@ package gov.jets.iti.LinguaQuest.controller.auth;
 
 
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
+import gov.jets.iti.LinguaQuest.dto.request.LogoutRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.*;
@@ -41,6 +42,12 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<RefreshTokenResponseDto>> refreshToken(@RequestBody @Valid RefreshTokenRequestDto request) {
         RefreshTokenResponseDto responseDto = authService.refreshToken(request);
         return ResponseEntity.ok(new SuccessResponse<>(true, responseDto));
+    }
+
+    @PostMapping(value = "/logout", version = "v1")
+    public ResponseEntity<SuccessResponse<LogoutResponseDto>> logout(@Valid LogoutRequestDto logoutRequestDto){
+        LogoutResponseDto logoutResponseDto = authService.logout(logoutRequestDto);
+        return ResponseEntity.ok(new SuccessResponse<>(true,logoutResponseDto));
     }
 
 

@@ -1,14 +1,10 @@
 package gov.jets.iti.LinguaQuest.service;
 
+import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
 import gov.jets.iti.LinguaQuest.dto.request.*;
-import gov.jets.iti.LinguaQuest.dto.response.AuthResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.PasswordResetOtpVerifyResponse;
-import gov.jets.iti.LinguaQuest.dto.response.RegisterResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.UserDto;
-import gov.jets.iti.LinguaQuest.dto.response.RefreshTokenResponseDto;
 import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.entity.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.TargetLanguage;
@@ -107,6 +103,11 @@ public class AuthService {
                 "Bearer",
                 jwtUtil.getExpirationMs()
         );
+    }
+
+    @Transactional
+    public LogoutResponseDto logout(LogoutRequestDto logoutRequestDto) {
+
     }
 
     private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
