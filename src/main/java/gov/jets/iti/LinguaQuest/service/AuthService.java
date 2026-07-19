@@ -10,16 +10,16 @@ import gov.jets.iti.LinguaQuest.dto.response.RegisterResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
 import gov.jets.iti.LinguaQuest.dto.response.RefreshTokenResponseDto;
 import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
-import gov.jets.iti.LinguaQuest.entity.SignInProvider;
-import gov.jets.iti.LinguaQuest.entity.TargetLanguage;
+import gov.jets.iti.LinguaQuest.enums.SignInProvider;
+import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
-import gov.jets.iti.LinguaQuest.repository.TargetLanguageRepository;
+import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
-import gov.jets.iti.LinguaQuest.entity.OtpPurpose;
+import gov.jets.iti.LinguaQuest.enums.OtpPurpose;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Hex;
@@ -42,7 +42,7 @@ public class AuthService {
     final private AuthenticationManager authenticationManager;
     final private JwtUtil jwtUtil;
     final private UserRepository userRepository;
-    final private TargetLanguageRepository targetLanguageRepository;
+    final private LanguageRepository targetLanguageRepository;
     final private PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final OtpService otpService;
@@ -60,11 +60,11 @@ public class AuthService {
         if (userRepository.existsByUsername(registerRequestDto.username())) {
             throw new UsernameAlreadyExistsException("username " + registerRequestDto.username() + " already exists");
         }
-        TargetLanguage targetLanguage = targetLanguageRepository.findByName(registerRequestDto.targetLanguage());
+        Language targetLanguage = targetLanguageRepository.findByName(registerRequestDto.targetLanguage());
         if (targetLanguage == null) {
             throw new TargetLanguageNotSupportedException("Language " + registerRequestDto.targetLanguage() + "is Not supported");
         }
-        Set<TargetLanguage> targetLanguageSet = new HashSet<>();
+        Set<Language> targetLanguageSet = new HashSet<>();
         targetLanguageSet.add(targetLanguage);
 
         User user = User.builder()
