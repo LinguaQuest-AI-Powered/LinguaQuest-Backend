@@ -12,6 +12,7 @@ import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
+import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
@@ -47,6 +48,7 @@ public class AuthService {
     private final OtpService otpService;
     private final StringRedisTemplate stringRedisTemplate;
     private final RefreshTokenService refreshTokenService;
+    private final UserLanguageRepository userLanguageRepository;
 
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final String RESET_TOKEN_PREFIX = "reset-token:";
@@ -79,6 +81,8 @@ public class AuthService {
                 .role(Role.ROLE_USER)
                 .signInProvider(SignInProvider.LOCAL).profileComplete(true)
                 .build();
+
+        userLanguage.setUser(user);
         userRepository.save(user);
         return mapUserToRegisterResponseDto(user);
     }
@@ -92,9 +96,10 @@ public class AuthService {
         if (!userPrinciple.user().getIsVerified()) {
             throw new EmailNotVerifiedException("Please verify your email before logging in");
         }
+        Set<Language> targetLanguage = userLanguageRepository.findLanguageByUserId(userPrinciple.user().getId());
         String jwtToken = jwtUtil.generateToken(userPrinciple);
         String refreshToken = refreshTokenService.createRefreshToken(userPrinciple.user());
-        UserDto userDto = mapUserPrincipleToUserDto(userPrinciple);
+        UserDto userDto = mapUserPrincipleToUserDto(userPrinciple,targetLanguage);
         return new AuthResponseDto(jwtToken, refreshToken, "Bearer", jwtUtil.getExpirationMs(), userDto);
 
     }
@@ -117,10 +122,9 @@ public class AuthService {
         return new LogoutResponseDto("success");
     }
 
-    private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
+    private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple,Set<Language> targetLanguages) {
         return new UserDto(userPrinciple.user().getId(), userPrinciple.user().getUsername(),userPrinciple.user().getPhoto()
-        ,userPrinciple.user().getNativeLanguage().getName(),userPrinciple.user().getIsVerified(),userPrinciple.user()
-                .getLanguages().stream().map((e) -> e.getLanguage()).collect(Collectors.toSet()));
+        ,userPrinciple.user().getNativeLanguage().getName(),userPrinciple.user().getIsVerified(),targetLanguages);
     }
 
     private RegisterResponseDto mapUserToRegisterResponseDto(User user){
