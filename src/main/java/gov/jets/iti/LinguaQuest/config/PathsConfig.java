@@ -15,6 +15,6 @@ public class PathsConfig {
 
     @Bean("privatePaths")
     List<String> privatePaths() {
-        return List.of("/api/**","/api/v1/auth/logout");
+        return List.of("/api/**");
     }
 }

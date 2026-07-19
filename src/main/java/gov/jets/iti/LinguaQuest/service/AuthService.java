@@ -107,7 +107,8 @@ public class AuthService {
 
     @Transactional
     public LogoutResponseDto logout(LogoutRequestDto logoutRequestDto) {
-
+        refreshTokenService.revokeRefreshToken(logoutRequestDto.refreshToken(),logoutRequestDto.allDevices());
+        return new LogoutResponseDto("success");
     }
 
     private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple) {
