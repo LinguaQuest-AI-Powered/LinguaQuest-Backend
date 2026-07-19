@@ -26,6 +26,7 @@ public class OAuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public OAuthResponseDto firebaseLogin(String idToken) {
@@ -88,6 +89,8 @@ public class OAuthService {
     private OAuthResponseDto buildResponse(User user) {
         UserPrinciple userPrinciple = new UserPrinciple(user);
         String accessToken = jwtUtil.generateToken(userPrinciple);
+        String refreshToken = refreshTokenService.createRefreshToken(user);
+        Long expiry = jwtUtil.getExpirationMs();
 
         boolean profileComplete = user.isProfileComplete();
 
@@ -102,9 +105,9 @@ public class OAuthService {
 
         return new OAuthResponseDto(
                 accessToken,
-                "",  // refresh token /// TODO
+                refreshToken,
                 "Bearer",
-                86400000L,
+                expiry,
                 profileComplete,
                 userDto
         );
