@@ -17,14 +17,20 @@ import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import io.jsonwebtoken.ExpiredJwtException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
+
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -118,6 +124,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LanguageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestParameter(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request) {
+
+        String message = String.format(
+                "%s query parameter is required",
+                ex.getParameterName()
+        );
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                message,
+                request
+        );
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {

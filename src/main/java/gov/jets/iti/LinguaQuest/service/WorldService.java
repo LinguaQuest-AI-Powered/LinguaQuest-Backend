@@ -5,6 +5,7 @@ import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
+import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldRepository;
@@ -23,6 +24,11 @@ public class WorldService {
     private final UserLevelProgressRepository userLevelProgressRepository;
 
     public WorldsResponseDto getAllWorlds(Long userId,Long languageId, Difficulty difficulty) {
+
+        if(languageId < 1) {
+            throw new InvalidLanguageIdException("Invalid languageId");
+        }
+
         List<World> worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
         List<WorldDto> worldDtos = new ArrayList<>();
 
