@@ -2,7 +2,7 @@ package gov.jets.iti.LinguaQuest.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import gov.jets.iti.LinguaQuest.dto.ImageUploadResponseDTO;
+import gov.jets.iti.LinguaQuest.dto.response.ImageUploadResponseDTO;
 import gov.jets.iti.LinguaQuest.exception.ImageUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PhotoService {
+public class ImageService {
 
     private final Cloudinary cloudinary;
 
