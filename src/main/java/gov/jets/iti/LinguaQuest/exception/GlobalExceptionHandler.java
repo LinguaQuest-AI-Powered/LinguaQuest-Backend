@@ -14,6 +14,7 @@ import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
+import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -143,6 +144,11 @@ public class GlobalExceptionHandler {
                 message,
                 request
         );
+    }
+
+    @ExceptionHandler(WorldNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWorldNotFoundException(WorldNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "WORLD_NOT_FOUND", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {

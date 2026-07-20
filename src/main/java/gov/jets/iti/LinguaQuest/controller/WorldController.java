@@ -1,10 +1,7 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
-import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
-import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.service.WorldService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
@@ -39,7 +36,16 @@ public class WorldController {
                                                                         @NotEmpty(message = "difficulty is required")
                                                                         String difficulty){
         Difficulty diff = Difficulty.valueOf(difficulty);
-        WorldsResponseDto worldsResponseDto =  worldService.getAllWorlds(userPrinciple.user().getId(), languageId,diff);
+        WorldsResponseDto worldsResponseDto = worldService.getAllWorlds(userPrinciple.user().getId(), languageId,diff);
+        return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
+    }
+
+    @GetMapping(value = "/{worldId}/levels" , version = "v1")
+    ResponseEntity<SuccessResponse<WorldLevelsResponseDto>> getLevelsOfAWorld(@AuthenticationPrincipal UserPrinciple userPrinciple ,
+                                                                              @PathVariable("worldId") Long worldId,
+                                                                              @RequestParam("languageId") Long languageId) {
+
+        WorldLevelsResponseDto worldsResponseDto = worldService.getWorldLevels(userPrinciple.user().getId(), worldId,languageId);
         return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
     }
 
