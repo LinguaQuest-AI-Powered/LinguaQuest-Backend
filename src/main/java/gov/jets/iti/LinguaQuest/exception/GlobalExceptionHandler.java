@@ -95,6 +95,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<ErrorResponse> handleImageUpload(ImageUploadException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "IMAGE_UPLOAD_ERROR", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(org.springframework.web.multipart.MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE, "MAX_FILE_SIZE_EXCEEDED", "Uploaded file exceeds the maximum allowed limit of 10MB", request);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(
                 request.getRequestURI(),
