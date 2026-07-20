@@ -8,6 +8,9 @@ import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
+import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -53,10 +56,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(FieldError::getDefaultMessage)
-                .orElse("Validation failed");
+        String message = ex.getBindingResult().getFieldErrors().stream().findFirst().map(FieldError::getDefaultMessage).orElse("Validation failed");
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, request);
     }
 
@@ -105,14 +105,23 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONTENT_TOO_LARGE, "MAX_FILE_SIZE_EXCEEDED", "Uploaded file exceeds the maximum allowed limit of 10MB", request);
     }
 
+    @ExceptionHandler(LanguageAlreadyAddedException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageAlreadyAdded(LanguageAlreadyAddedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "LANGUAGE_ALREADY_ADDED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidLanguageIdException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidLanguageId(InvalidLanguageIdException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LanguageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
-        ErrorDetails details = new ErrorDetails(
-                request.getRequestURI(),
-                status.value(),
-                errorKey,
-                message,
-                Instant.now()
-        );
+        ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
     }
 }
