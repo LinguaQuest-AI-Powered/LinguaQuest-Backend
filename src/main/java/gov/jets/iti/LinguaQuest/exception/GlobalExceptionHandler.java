@@ -10,6 +10,7 @@ import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -112,6 +113,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidLanguageIdException.class)
     public ResponseEntity<ErrorResponse> handleInvalidLanguageId(InvalidLanguageIdException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LanguageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {

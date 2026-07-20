@@ -1,15 +1,13 @@
 package gov.jets.iti.LinguaQuest.service;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.AvailableLanguagesResponse;
-import gov.jets.iti.LinguaQuest.dto.response.LanguageOptionDto;
-import gov.jets.iti.LinguaQuest.dto.response.MyLanguagesResponse;
-import gov.jets.iti.LinguaQuest.dto.response.UserLanguageDto;
+import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
@@ -86,6 +84,27 @@ public class LanguageService {
         userLanguageRepository.saveAll(newRows);
 
         return getMyLanguages(userId);
+    }
+
+    @Transactional
+    public ActiveLanguageResponse setActiveLanguage(Long userId, Long languageId){
+        UserLanguage userLanguage = userLanguageRepository
+                .findByUserIdAndLanguageIdWithLanguage(userId,languageId)
+                .orElseThrow(()-> new LanguageNotFoundException("This language is not in your profile yet"));
+        userLanguage.setActive(true);
+        userLanguageRepository.deactivateAllExcept(userId,userLanguage.getId());
+        userLanguageRepository.save(userLanguage);
+
+        UserLanguageDto userLanguageDto = new UserLanguageDto(
+                userLanguage.getLanguage().getId(),
+                userLanguage.getLanguage().getName(),
+                userLanguage.getLanguage().getCode(),
+                userLanguage.getLanguage().getImageUrl(),
+                userLanguage.getLevel(),
+                userLanguage.isActive(),
+                userLanguage.getProgressPercent()
+        );
+        return new ActiveLanguageResponse(userLanguageDto);
     }
 
 }

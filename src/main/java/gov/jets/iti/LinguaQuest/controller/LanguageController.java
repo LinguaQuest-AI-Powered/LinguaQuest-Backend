@@ -1,6 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 import gov.jets.iti.LinguaQuest.dto.request.AddLanguagesRequest;
+import gov.jets.iti.LinguaQuest.dto.request.SetActiveLanguageRequest;
+import gov.jets.iti.LinguaQuest.dto.response.ActiveLanguageResponse;
 import gov.jets.iti.LinguaQuest.dto.response.AvailableLanguagesResponse;
 import gov.jets.iti.LinguaQuest.dto.response.MyLanguagesResponse;
 import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
@@ -33,6 +35,12 @@ public class LanguageController {
     @PostMapping
     public ResponseEntity<SuccessResponse<MyLanguagesResponse>> addLanguages(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid AddLanguagesRequest request) {
         MyLanguagesResponse response = languageService.addLanguages(principle.user().getId(), request.languageIds());
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
+    @PatchMapping("/active")
+    public ResponseEntity<SuccessResponse<ActiveLanguageResponse>> setActiveLanguage(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid SetActiveLanguageRequest request) {
+        ActiveLanguageResponse response = languageService.setActiveLanguage(principle.user().getId(), request.languageId());
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
 }
