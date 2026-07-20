@@ -1,16 +1,16 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.response.AvailableLanguagesResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.MyLanguagesResponseDto;
+import gov.jets.iti.LinguaQuest.dto.request.AddLanguagesRequest;
+import gov.jets.iti.LinguaQuest.dto.response.AvailableLanguagesResponse;
+import gov.jets.iti.LinguaQuest.dto.response.MyLanguagesResponse;
 import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.LanguageService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/{version}/languages")
@@ -19,14 +19,20 @@ public class LanguageController {
     private final LanguageService languageService;
 
     @GetMapping("/available")
-    public ResponseEntity<SuccessResponse<AvailableLanguagesResponseDto>> getAvailableLanguages(@AuthenticationPrincipal UserPrinciple principle) {
-        AvailableLanguagesResponseDto response = languageService.getAvailableLanguages(principle.user().getId());
+    public ResponseEntity<SuccessResponse<AvailableLanguagesResponse>> getAvailableLanguages(@AuthenticationPrincipal UserPrinciple principle) {
+        AvailableLanguagesResponse response = languageService.getAvailableLanguages(principle.user().getId());
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<SuccessResponse<MyLanguagesResponseDto>> getMyLanguages(@AuthenticationPrincipal UserPrinciple principle){
-        MyLanguagesResponseDto response = languageService.getMyLanguages(principle.user().getId());
-        return ResponseEntity.ok(new SuccessResponse<>(true,response));
+    public ResponseEntity<SuccessResponse<MyLanguagesResponse>> getMyLanguages(@AuthenticationPrincipal UserPrinciple principle) {
+        MyLanguagesResponse response = languageService.getMyLanguages(principle.user().getId());
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
+    @PostMapping
+    public ResponseEntity<SuccessResponse<MyLanguagesResponse>> addLanguages(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid AddLanguagesRequest request) {
+        MyLanguagesResponse response = languageService.addLanguages(principle.user().getId(), request.languageIds());
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
 }
