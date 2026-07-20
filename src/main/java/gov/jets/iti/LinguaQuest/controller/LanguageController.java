@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/languages")
+@RequestMapping("/api/{version}/languages")
 @RequiredArgsConstructor
 public class LanguageController {
     private final LanguageService languageService;
