@@ -29,7 +29,7 @@ public class WorldService {
         for(World world : worldDtoList) {
             long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
             long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),languageId);
-            long progressPercent = (worldCompletedLevels / worldLevelCount) * 100;
+            long progressPercent = (worldCompletedLevels* 100) / worldLevelCount;
             WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent);
             worldDtos.add(worldDto);
         }
