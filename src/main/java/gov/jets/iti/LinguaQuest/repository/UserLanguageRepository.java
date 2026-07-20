@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface UserLanguageRepository extends JpaRepository<UserLanguage,Long> {
 
+    @Query("SELECT ul.language.id FROM UserLanguage ul WHERE ul.user.id = :userId")
+    Set<Long> findLanguageIdsByUserId(@Param("userId") Long userId);
     @Query("""
            SELECT ul.language
            FROM UserLanguage ul
