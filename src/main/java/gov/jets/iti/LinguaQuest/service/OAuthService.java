@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +41,16 @@ public class OAuthService {
         String email = firebaseToken.getEmail();
         SignInProvider provider = resolveProvider(firebaseToken);
 
+        String photoUrl = firebaseToken.getPicture();
+
         // 1. Returning user — match by Firebase UID
         Optional<User> existingByUid = userRepository.findByFirebaseUid(uid);
         if (existingByUid.isPresent()) {
             User user = existingByUid.get();
+            if (user.getPhotoPublicId() == null && photoUrl != null && !photoUrl.equals(user.getPhoto())) {
+                user.setPhoto(photoUrl);
+                user = userRepository.save(user);
+            }
             return buildResponse(user);
         }
 
@@ -56,11 +62,11 @@ public class OAuthService {
         }
 
         // 3. New user — create account
-        User newUser = createOAuthUser(email, uid, provider);
+        User newUser = createOAuthUser(email, uid, provider, photoUrl);
         return buildResponse(newUser);
     }
 
-    private User createOAuthUser(String email, String firebaseUid, SignInProvider provider) {
+    private User createOAuthUser(String email, String firebaseUid, SignInProvider provider, String photoUrl) {
         String username = generateUsername(email);
         String sentinelPassword = passwordEncoder.encode(UUID.randomUUID().toString());
 
@@ -70,6 +76,7 @@ public class OAuthService {
                 .signInProvider(provider)
                 .username(username)
                 .password(sentinelPassword)
+                .photo(photoUrl)
                 .isVerified(true)
                 .role(Role.ROLE_USER)
                 .profileComplete(false)
@@ -99,11 +106,12 @@ public class OAuthService {
 
         boolean profileComplete = user.isProfileComplete();
         Set<Language> targetLanguage = userLanguageRepository.findLanguageByUserId(user.getId());
+        String nativeLanguageName = user.getNativeLanguage() != null ? user.getNativeLanguage().getName() : null;
         UserDto userDto = new UserDto(
                 user.getId(),
                 user.getUsername(),
                 user.getPhoto(),
-                user.getNativeLanguage().getName(),
+                nativeLanguageName,
                 user.getIsVerified(),
                 targetLanguage
         );
