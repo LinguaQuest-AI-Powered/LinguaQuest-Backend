@@ -55,6 +55,9 @@ public class User {
     @Column(length = 500)
     private String photo;
 
+    @Column(name = "photo_public_id", length = 200)
+    private String photoPublicId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "native_language_id")
     private Language nativeLanguage;
@@ -70,6 +73,10 @@ public class User {
     @Column(name = "profile_complete", nullable = false)
     @Builder.Default
     private boolean profileComplete = false;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
 
     @Column(nullable = false)
     @Builder.Default
