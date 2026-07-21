@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "user_level_progress",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "level_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "level_id","word_id"})
 )
 @Getter
 @Setter
