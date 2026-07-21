@@ -65,6 +65,7 @@ public class AuthService {
                 .orElseThrow(() -> new TargetLanguageNotSupportedException("Language " + registerRequestDto.targetLanguage() + "is Not supported"));
         UserLanguage userLanguage = UserLanguage.builder()
                 .language(targetLanguage)
+                .isActive(true)
                 .build();
         Set<UserLanguage> targetLanguageSet = new HashSet<>();
         targetLanguageSet.add(userLanguage);
