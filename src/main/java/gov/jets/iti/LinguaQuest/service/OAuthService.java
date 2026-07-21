@@ -99,11 +99,12 @@ public class OAuthService {
 
         boolean profileComplete = user.isProfileComplete();
         Set<Language> targetLanguage = userLanguageRepository.findLanguageByUserId(user.getId());
+        String nativeLanguageName = user.getNativeLanguage() != null ? user.getNativeLanguage().getName() : null;
         UserDto userDto = new UserDto(
                 user.getId(),
                 user.getUsername(),
                 user.getPhoto(),
-                user.getNativeLanguage().getName(),
+                nativeLanguageName,
                 user.getIsVerified(),
                 targetLanguage
         );
