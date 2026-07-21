@@ -17,6 +17,8 @@ import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
+import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -149,6 +151,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WorldNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleWorldNotFoundException(WorldNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "WORLD_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "USERNAME_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
