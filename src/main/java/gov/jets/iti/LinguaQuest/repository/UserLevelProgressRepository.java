@@ -34,5 +34,11 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
             Long worldId,
             Long languageId);
 
-
+    @Query("""
+    SELECT COUNT(DISTINCT ulp.worldLevel.world.id)
+    FROM UserLevelProgress ulp
+    WHERE ulp.user.id = :userId
+      AND ulp.status = LevelStatus.COMPLETED
+    """)
+    int countDistinctCompletedWorldsByUserId(@Param("userId") Long userId);
 }
