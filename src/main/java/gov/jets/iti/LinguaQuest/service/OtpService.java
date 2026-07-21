@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
 
-import gov.jets.iti.LinguaQuest.entity.OtpPurpose;
+import gov.jets.iti.LinguaQuest.enums.OtpPurpose;
 import gov.jets.iti.LinguaQuest.entity.Otp;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;

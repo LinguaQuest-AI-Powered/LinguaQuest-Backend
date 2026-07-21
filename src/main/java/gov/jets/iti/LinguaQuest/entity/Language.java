@@ -9,13 +9,15 @@ import lombok.Setter;
 
 import java.util.Objects;
 
+// Catalog / reference table - one row per supported language (Spanish,
+// French, Japanese...). Seeded by admins, not created by users.
 @Entity
-@Table(name = "target_languages")
+@Table(name = "languages")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetLanguage {
+public class Language {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +30,14 @@ public class TargetLanguage {
     @Column(unique = true, length = 5)
     private String code;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TargetLanguage)) return false;
-        TargetLanguage language = (TargetLanguage) o;
+        if (!(o instanceof Language)) return false;
+        Language language = (Language) o;
         return name != null && name.equals(language.name);
     }
 

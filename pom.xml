@@ -119,6 +119,11 @@
 			<artifactId>google-http-client-apache-v2</artifactId>
 			<version>1.45.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.39.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

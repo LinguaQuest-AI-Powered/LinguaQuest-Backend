@@ -1,12 +1,14 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import com.google.firebase.auth.FirebaseToken;
+import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.response.OAuthResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.UserDto;
-import gov.jets.iti.LinguaQuest.entity.SignInProvider;
+import gov.jets.iti.LinguaQuest.enums.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
+import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
@@ -16,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class OAuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+    private final UserLanguageRepository userLanguageRepository;
 
     @Transactional
     public OAuthResponseDto firebaseLogin(String idToken) {
@@ -93,14 +98,14 @@ public class OAuthService {
         Long expiry = jwtUtil.getExpirationMs();
 
         boolean profileComplete = user.isProfileComplete();
-
+        Set<Language> targetLanguage = userLanguageRepository.findLanguageByUserId(user.getId());
         UserDto userDto = new UserDto(
                 user.getId(),
                 user.getUsername(),
                 user.getPhoto(),
-                user.getNativeLanguage(),
+                user.getNativeLanguage().getName(),
                 user.getIsVerified(),
-                user.getTargetLanguages()
+                targetLanguage
         );
 
         return new OAuthResponseDto(

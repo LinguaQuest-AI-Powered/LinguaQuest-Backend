@@ -8,20 +8,32 @@ import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
+import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
+import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
+import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
+
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,10 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(FieldError::getDefaultMessage)
-                .orElse("Validation failed");
+        String message = ex.getBindingResult().getFieldErrors().stream().findFirst().map(FieldError::getDefaultMessage).orElse("Validation failed");
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, request);
     }
 
@@ -95,14 +104,67 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", ex.getMessage(), request);
     }
 
-    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
-        ErrorDetails details = new ErrorDetails(
-                request.getRequestURI(),
-                status.value(),
-                errorKey,
-                message,
-                Instant.now()
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<ErrorResponse> handleImageUpload(ImageUploadException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "IMAGE_UPLOAD_ERROR", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(org.springframework.web.multipart.MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONTENT_TOO_LARGE, "MAX_FILE_SIZE_EXCEEDED", "Uploaded file exceeds the maximum allowed limit of 10MB", request);
+    }
+
+    @ExceptionHandler(LanguageAlreadyAddedException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageAlreadyAdded(LanguageAlreadyAddedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "LANGUAGE_ALREADY_ADDED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidLanguageIdException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidLanguageId(InvalidLanguageIdException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LanguageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestParameter(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request) {
+
+        String message = String.format(
+                "%s query parameter is required",
+                ex.getParameterName()
         );
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                message,
+                request
+        );
+    }
+
+    @ExceptionHandler(WorldNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWorldNotFoundException(WorldNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "WORLD_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "USERNAME_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex.getMessage(), request);
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
+        ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
     }
 }
