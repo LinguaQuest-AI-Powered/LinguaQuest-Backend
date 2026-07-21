@@ -16,6 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByFirebaseUid(String firebaseUid);
 
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.nativeLanguage WHERE u.id = :id")
+    Optional<User> findByIdWithNativeLanguage(@Param("id") Long id);
+
     @Modifying
     @Query("UPDATE User u SET u.isVerified = true WHERE u.email = :email")
     void markEmailVerified(@Param("email") String email);
