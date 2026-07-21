@@ -38,6 +38,13 @@ public interface UserLanguageRepository extends JpaRepository<UserLanguage,Long>
     Optional<UserLanguage> findByUserIdAndLanguageIdWithLanguage(
             @Param("userId") Long userId, @Param("languageId") Long languageId);
 
+    @Query("""
+            SELECT ul FROM UserLanguage ul
+            JOIN FETCH ul.language
+            WHERE ul.user.id = :userId AND ul.isActive = true
+            """)
+    Optional<UserLanguage> findActiveByUserIdWithLanguage(@Param("userId") Long userId);
+
     @Modifying
     @Query("UPDATE UserLanguage ul SET ul.isActive = false WHERE ul.user.id = :userId AND ul.id <> :excludeId")
     void deactivateAllExcept(@Param("userId") Long userId, @Param("excludeId") Long excludeId);
