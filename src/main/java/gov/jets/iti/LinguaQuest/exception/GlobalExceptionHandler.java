@@ -11,6 +11,7 @@ import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -163,6 +164,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex.getMessage(), request);
     }
 
+
+    @ExceptionHandler(NoActiveLanguageException.class)
+    public ResponseEntity<ErrorResponse> handleNoActiveLanguageException(NoActiveLanguageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "NO_ACTIVE_LANGUAGE", ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
