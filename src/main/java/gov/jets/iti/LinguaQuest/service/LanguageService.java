@@ -107,4 +107,18 @@ public class LanguageService {
         return new ActiveLanguageResponse(userLanguageDto);
     }
 
+    public AvailableLanguagesResponse getAvailableLanguages(){
+        List<Language> languagesList = languageRepository.findAllByOrderByNameAsc();
+        List<LanguageOptionDto> languages = languagesList.stream()
+                .map(language -> new LanguageOptionDto(
+                        language.getId(),
+                        language.getName(),
+                        language.getCode(),
+                        language.getImageUrl(),
+                        false
+                ))
+                .toList();
+
+        return new AvailableLanguagesResponse(languages);
+    }
 }
