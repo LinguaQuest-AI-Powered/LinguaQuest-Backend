@@ -17,6 +17,8 @@ import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import org.springframework.security.authentication.BadCredentialsException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
@@ -75,6 +77,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> handleExpiredJwt(ExpiredJwtException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED", "Your session has expired. Please log in again.", request);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class, JwtException.class})
+    public ResponseEntity<ErrorResponse> handleBadCredentials(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Invalid or malformed token received", request);
     }
 
     @ExceptionHandler(InvalidFirebaseTokenException.class)
