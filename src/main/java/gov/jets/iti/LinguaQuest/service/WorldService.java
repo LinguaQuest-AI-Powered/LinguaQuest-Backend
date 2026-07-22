@@ -19,9 +19,9 @@ import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -144,6 +144,25 @@ public class WorldService {
                 .filter(level -> level.getStatus() == LevelStatus.LOCKED)
                 .findFirst()
                 .ifPresent(level -> level.setStatus(LevelStatus.AVAILABLE));
+    }
+
+    public WorldsResponseDto getExploreWorldsPreview(Long userId, Long languageId, int limit) {
+        List<World> allWorlds = worldRepository.findAll();
+        List<WorldDto> worldDtos = new ArrayList<>();
+
+        for (World world : allWorlds) {
+            long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
+            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId, world.getId(), languageId);
+            long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
+            worldDtos.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
+        }
+
+        List<WorldDto> topWorlds = worldDtos.stream()
+                .sorted(Comparator.comparingLong(WorldDto::completedLevels).reversed())
+                .limit(limit)
+                .toList();
+
+        return new WorldsResponseDto(topWorlds.size(), topWorlds);
     }
 
     private WorldDto mapWorldToWorldDto(World world,long worldLevelCount, long worldCompletedLevels, long progressPercent) {
