@@ -55,23 +55,57 @@ public class WorldService {
         return new WorldsResponseDto(worldDtos.size(),worldDtos);
     }
 
-    public WorldLevelsResponseDto getWorldLevels(Long userId , Long worldId) {
-        UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
-                .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
+    public WorldLevelsResponseDto getWorldLevels(Long userId, Long worldId) {
 
-        World world = worldRepository.findById(worldId)
-                .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " is not exist"));
+        UserLanguage userLanguage = getActiveUserLanguage(userId);
+        World world = getWorld(worldId);
 
-        List<UserLevelProgress> unlockedLevels = userLevelProgressRepository.findUserProgressLevels(userId,worldId,userLanguage.getLanguage().getId());
-        List<WorldLevel> allLevels = worldLevelRepository.findWorldLevels(worldId);
-        Map<Long, UserLevelProgress> progressMap =
-                unlockedLevels.stream()
-                        .collect(Collectors.toMap(
-                                p -> p.getWorldLevel().getId(),
-                                Function.identity()
-                        ));
+        List<UserLevelProgress> progressLevels =
+                userLevelProgressRepository.findUserProgressLevels(
+                        userId,
+                        worldId,
+                        userLanguage.getLanguage().getId());
+
+        List<WorldLevel> worldLevels = worldLevelRepository.findWorldLevels(worldId);
+
+        List<LevelDto> levels = buildLevelDtos(worldLevels, progressLevels);
+
+        updateAvailableLevel(levels);
+
+        return new WorldLevelsResponseDto(
+                worldId,
+                world.getName(),
+                world.getDifficulty(),
+                levels
+        );
+    }
+
+    private UserLanguage getActiveUserLanguage(Long userId) {
+        return userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() ->
+                        new NoActiveLanguageException(
+                                "User with id " + userId + " doesn't have an active language"));
+    }
+
+    private World getWorld(Long worldId) {
+        return worldRepository.findById(worldId)
+                .orElseThrow(() ->
+                        new WorldNotFoundException(
+                                "World with id " + worldId + " does not exist"));
+    }
+
+    private List<LevelDto> buildLevelDtos(List<WorldLevel> worldLevels,
+                                          List<UserLevelProgress> progressLevels) {
+
+        Map<Long, UserLevelProgress> progressMap = progressLevels.stream()
+                .collect(Collectors.toMap(
+                        p -> p.getWorldLevel().getId(),
+                        Function.identity()
+                ));
+
         List<LevelDto> levels = new ArrayList<>();
-        for (WorldLevel level : allLevels) {
+
+        for (WorldLevel level : worldLevels) {
 
             UserLevelProgress progress = progressMap.get(level.getId());
 
@@ -92,7 +126,24 @@ public class WorldService {
             }
         }
 
-        return new WorldLevelsResponseDto(worldId,world.getName(),world.getDifficulty(),levels);
+        return levels;
+    }
+
+    private void updateAvailableLevel(List<LevelDto> levels) {
+
+        boolean hasPlayableLevel = levels.stream()
+                .anyMatch(level ->
+                        level.getStatus() == LevelStatus.INPROGRESS ||
+                                level.getStatus() == LevelStatus.AVAILABLE);
+
+        if (hasPlayableLevel) {
+            return;
+        }
+
+        levels.stream()
+                .filter(level -> level.getStatus() == LevelStatus.LOCKED)
+                .findFirst()
+                .ifPresent(level -> level.setStatus(LevelStatus.AVAILABLE));
     }
 
     private WorldDto mapWorldToWorldDto(World world,long worldLevelCount, long worldCompletedLevels, long progressPercent) {
