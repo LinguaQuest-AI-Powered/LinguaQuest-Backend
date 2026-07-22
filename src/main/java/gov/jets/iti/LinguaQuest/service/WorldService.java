@@ -4,13 +4,16 @@ import gov.jets.iti.LinguaQuest.dto.response.LevelDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldLevelsResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
+import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldRepository;
@@ -31,19 +34,20 @@ public class WorldService {
     private final WorldRepository worldRepository;
     private final WorldLevelRepository worldLevelRepository;
     private final UserLevelProgressRepository userLevelProgressRepository;
+    private final UserLanguageRepository userLanguageRepository;
 
-    public WorldsResponseDto getAllWorlds(Long userId,Long languageId, Difficulty difficulty) {
+    public WorldsResponseDto getAllWorlds(Long userId, Difficulty difficulty) {
 
-        if(languageId < 1) {
-            throw new InvalidLanguageIdException("Invalid languageId");
-        }
+
+        UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
 
         List<World> worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
         List<WorldDto> worldDtos = new ArrayList<>();
 
         for(World world : worldDtoList) {
             long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
-            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),languageId);
+            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),userLanguage.getLanguage().getId());
             long progressPercent = (worldCompletedLevels* 100) / worldLevelCount;
             WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent);
             worldDtos.add(worldDto);
@@ -51,23 +55,57 @@ public class WorldService {
         return new WorldsResponseDto(worldDtos.size(),worldDtos);
     }
 
-    public WorldLevelsResponseDto getWorldLevels(Long userId , Long worldId, Long languageId) {
-        if(languageId < 1) {
-            throw new InvalidLanguageIdException("Invalid languageId");
-        }
-        World world = worldRepository.findById(worldId)
-                .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " is not exist"));
+    public WorldLevelsResponseDto getWorldLevels(Long userId, Long worldId) {
 
-        List<UserLevelProgress> unlockedLevels = userLevelProgressRepository.findUserProgressLevels(userId,worldId,languageId);
-        List<WorldLevel> allLevels = worldLevelRepository.findWorldLevels(worldId);
-        Map<Long, UserLevelProgress> progressMap =
-                unlockedLevels.stream()
-                        .collect(Collectors.toMap(
-                                p -> p.getWorldLevel().getId(),
-                                Function.identity()
-                        ));
+        UserLanguage userLanguage = getActiveUserLanguage(userId);
+        World world = getWorld(worldId);
+
+        List<UserLevelProgress> progressLevels =
+                userLevelProgressRepository.findUserProgressLevels(
+                        userId,
+                        worldId,
+                        userLanguage.getLanguage().getId());
+
+        List<WorldLevel> worldLevels = worldLevelRepository.findWorldLevels(worldId);
+
+        List<LevelDto> levels = buildLevelDtos(worldLevels, progressLevels);
+
+        updateAvailableLevel(levels);
+
+        return new WorldLevelsResponseDto(
+                worldId,
+                world.getName(),
+                world.getDifficulty(),
+                levels
+        );
+    }
+
+    private UserLanguage getActiveUserLanguage(Long userId) {
+        return userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() ->
+                        new NoActiveLanguageException(
+                                "User with id " + userId + " doesn't have an active language"));
+    }
+
+    private World getWorld(Long worldId) {
+        return worldRepository.findById(worldId)
+                .orElseThrow(() ->
+                        new WorldNotFoundException(
+                                "World with id " + worldId + " does not exist"));
+    }
+
+    private List<LevelDto> buildLevelDtos(List<WorldLevel> worldLevels,
+                                          List<UserLevelProgress> progressLevels) {
+
+        Map<Long, UserLevelProgress> progressMap = progressLevels.stream()
+                .collect(Collectors.toMap(
+                        p -> p.getWorldLevel().getId(),
+                        Function.identity()
+                ));
+
         List<LevelDto> levels = new ArrayList<>();
-        for (WorldLevel level : allLevels) {
+
+        for (WorldLevel level : worldLevels) {
 
             UserLevelProgress progress = progressMap.get(level.getId());
 
@@ -88,7 +126,24 @@ public class WorldService {
             }
         }
 
-        return new WorldLevelsResponseDto(worldId,world.getName(),world.getDifficulty(),levels);
+        return levels;
+    }
+
+    private void updateAvailableLevel(List<LevelDto> levels) {
+
+        boolean hasPlayableLevel = levels.stream()
+                .anyMatch(level ->
+                        level.getStatus() == LevelStatus.INPROGRESS ||
+                                level.getStatus() == LevelStatus.AVAILABLE);
+
+        if (hasPlayableLevel) {
+            return;
+        }
+
+        levels.stream()
+                .filter(level -> level.getStatus() == LevelStatus.LOCKED)
+                .findFirst()
+                .ifPresent(level -> level.setStatus(LevelStatus.AVAILABLE));
     }
 
     public WorldsResponseDto getExploreWorldsPreview(Long userId, Long languageId, int limit) {

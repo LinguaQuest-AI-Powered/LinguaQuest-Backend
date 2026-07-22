@@ -29,23 +29,20 @@ public class WorldController {
     final private WorldService worldService;
     @GetMapping(version = "v1")
     ResponseEntity<SuccessResponse<WorldsResponseDto>> getAllUserWorlds(@AuthenticationPrincipal UserPrinciple userPrinciple,
-                                                                        @RequestParam("languageId")
-                                                                        Long languageId,
                                                                         @RequestParam("difficulty")
                                                                         @Pattern(regexp = "EASY|MEDIUM|HARD")
                                                                         @NotEmpty(message = "difficulty is required")
                                                                         String difficulty){
         Difficulty diff = Difficulty.valueOf(difficulty);
-        WorldsResponseDto worldsResponseDto = worldService.getAllWorlds(userPrinciple.user().getId(), languageId,diff);
+        WorldsResponseDto worldsResponseDto = worldService.getAllWorlds(userPrinciple.user().getId(),diff);
         return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
     }
 
     @GetMapping(value = "/{worldId}/levels" , version = "v1")
     ResponseEntity<SuccessResponse<WorldLevelsResponseDto>> getLevelsOfAWorld(@AuthenticationPrincipal UserPrinciple userPrinciple ,
-                                                                              @PathVariable("worldId") Long worldId,
-                                                                              @RequestParam("languageId") Long languageId) {
+                                                                              @PathVariable("worldId") Long worldId) {
 
-        WorldLevelsResponseDto worldsResponseDto = worldService.getWorldLevels(userPrinciple.user().getId(), worldId,languageId);
+        WorldLevelsResponseDto worldsResponseDto = worldService.getWorldLevels(userPrinciple.user().getId(), worldId);
         return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
     }
 
