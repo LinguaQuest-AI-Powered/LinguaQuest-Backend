@@ -26,6 +26,7 @@ import gov.jets.iti.LinguaQuest.dto.request.CompleteProfileRequest;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.profile.ProfileAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 
@@ -138,6 +139,10 @@ public class OAuthService {
     public OAuthResponseDto completeProfile(Long userId, CompleteProfileRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EmailNotFoundException("User not found"));
+
+        if (user.isProfileComplete()) {
+            throw new ProfileAlreadyCompletedException("Profile is already completed");
+        }
 
         Language nativeLanguage = languageRepository.findById(request.nativeLanguageId())
                 .orElseThrow(() -> new InvalidLanguageIdException("Native language not found with ID: " + request.nativeLanguageId()));
