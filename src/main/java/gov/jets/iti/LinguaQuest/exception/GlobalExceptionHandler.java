@@ -15,6 +15,9 @@ import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
+import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
+import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -184,6 +187,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoActiveLanguageException.class)
     public ResponseEntity<ErrorResponse> handleNoActiveLanguageException(NoActiveLanguageException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "NO_ACTIVE_LANGUAGE", ex.getMessage(), request);
+    }
+    @ExceptionHandler(ActiveLevelNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleActiveLevelNotFound(ActiveLevelNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "ACTIVE_LEVEL_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(UserLanguageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserLanguageNotFound(UserLanguageNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "USER_LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidImage(InvalidImageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_IMAGE", ex.getMessage(), request);
     }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());

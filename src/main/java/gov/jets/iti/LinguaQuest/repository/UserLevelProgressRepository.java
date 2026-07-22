@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserLevelProgressRepository extends JpaRepository<UserLevelProgress,Long> {
     @Query("""
@@ -41,4 +42,20 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
       AND ulp.status = LevelStatus.COMPLETED
     """)
     int countDistinctCompletedWorldsByUserId(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT ulp FROM UserLevelProgress ulp
+    JOIN FETCH ulp.word w
+    JOIN FETCH w.language
+    JOIN FETCH ulp.worldLevel wl
+    JOIN FETCH wl.world
+    WHERE ulp.user.id = :userId
+      AND wl.world.id = :worldId
+      AND wl.id = :levelId
+      AND ( ulp.status = LevelStatus.INPROGRESS OR ulp.status = LevelStatus.COMPLETED)
+    """)
+    Optional<UserLevelProgress> findInProgressOrCompletedByUserIdAndWorldIdAndLevelId(
+            @Param("userId") Long userId,
+            @Param("worldId") Long worldId,
+            @Param("levelId") Long levelId);
 }
