@@ -27,8 +27,6 @@ import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
 import gov.jets.iti.LinguaQuest.exception.profile.ProfileAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -38,10 +36,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @Slf4j
 @RestControllerAdvice
@@ -190,12 +186,12 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(ActiveLevelNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleActiveLevelNotFound(ActiveLevelNotFoundException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "ACTIVE_LEVEL_NOT_FOUND", ex.getMessage(), request);
+        return buildResponse(HttpStatus.NOT_FOUND, "ACTIVE_LEVEL_NOT_FOUND", ex.getMessage(), request);
     }
 
     @ExceptionHandler(UserLanguageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserLanguageNotFound(UserLanguageNotFoundException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "USER_LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+        return buildResponse(HttpStatus.NOT_FOUND, "USER_LANGUAGE_NOT_FOUND", ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidImageException.class)
