@@ -12,6 +12,7 @@ import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
+import gov.jets.iti.LinguaQuest.repository.RefreshTokenRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
@@ -31,7 +32,6 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -52,6 +52,7 @@ public class AuthService {
 
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final String RESET_TOKEN_PREFIX = "reset-token:";
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public RegisterResponseDto register(RegisterRequestDto registerRequestDto) {
@@ -172,6 +173,8 @@ public class AuthService {
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found"));
         userService.updatePassword(user, passwordEncoder.encode(request.newPassword()));
+
+        refreshTokenRepository.revokeAllActiveByUserId(user.getId());
 
         stringRedisTemplate.delete(key);
     }

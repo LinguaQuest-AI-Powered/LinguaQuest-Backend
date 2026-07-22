@@ -8,6 +8,7 @@ import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.service.AuthService;
+import gov.jets.iti.LinguaQuest.service.LanguageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.time.Instant;
 public class AuthController {
 
     final private AuthService authService;
+    final private LanguageService languageService;
 
     @PostMapping(value = "/register",version = "v1")
     public ResponseEntity<SuccessResponse<RegisterResponseDto>> register(@RequestBody @Valid RegisterRequestDto registerRequestDto) {
@@ -48,6 +50,12 @@ public class AuthController {
     public ResponseEntity<SuccessResponse<LogoutResponseDto>> logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto){
         LogoutResponseDto logoutResponseDto = authService.logout(logoutRequestDto);
         return ResponseEntity.ok(new SuccessResponse<>(true,logoutResponseDto));
+    }
+
+    @GetMapping("languages")
+        public ResponseEntity<SuccessResponse<AvailableLanguagesResponse>> getAvailableLanguages() {
+        AvailableLanguagesResponse response = languageService.getAvailableLanguages();
+        return ResponseEntity.ok(new SuccessResponse<>(true,response));
     }
 
 
