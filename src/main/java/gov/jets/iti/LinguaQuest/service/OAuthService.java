@@ -22,6 +22,13 @@ import java.util.Set;
 import java.util.UUID;
 
 
+import gov.jets.iti.LinguaQuest.dto.request.CompleteProfileRequest;
+import gov.jets.iti.LinguaQuest.entity.UserLanguage;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
+import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
+
 @Service
 @RequiredArgsConstructor
 public class OAuthService {
@@ -32,6 +39,7 @@ public class OAuthService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
     private final UserLanguageRepository userLanguageRepository;
+    private final LanguageRepository languageRepository;
 
     @Transactional
     public OAuthResponseDto firebaseLogin(String idToken) {
@@ -124,6 +132,39 @@ public class OAuthService {
                 profileComplete,
                 userDto
         );
+    }
+
+    @Transactional
+    public OAuthResponseDto completeProfile(Long userId, CompleteProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EmailNotFoundException("User not found"));
+
+        Language nativeLanguage = languageRepository.findById(request.nativeLanguageId())
+                .orElseThrow(() -> new InvalidLanguageIdException("Native language not found with ID: " + request.nativeLanguageId()));
+
+        Language targetLanguage = languageRepository.findById(request.targetLanguageId())
+                .orElseThrow(() -> new InvalidLanguageIdException("Target language not found with ID: " + request.targetLanguageId()));
+
+        if (request.username() != null && !request.username().isBlank() && !request.username().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.username())) {
+                throw new UsernameAlreadyExistsException("Username '" + request.username() + "' is already taken");
+            }
+            user.setUsername(request.username());
+        }
+
+        user.setNativeLanguage(nativeLanguage);
+
+        UserLanguage userLanguage = UserLanguage.builder()
+                .user(user)
+                .language(targetLanguage)
+                .isActive(true)
+                .build();
+        user.getLanguages().add(userLanguage);
+
+        user.setProfileComplete(true);
+
+        User savedUser = userRepository.save(user);
+        return buildResponse(savedUser);
     }
 
     @SuppressWarnings("unchecked")
