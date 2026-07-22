@@ -4,13 +4,16 @@ import gov.jets.iti.LinguaQuest.dto.response.LevelDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldLevelsResponseDto;
 import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
+import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
+import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldRepository;
@@ -31,6 +34,7 @@ public class WorldService {
     private final WorldRepository worldRepository;
     private final WorldLevelRepository worldLevelRepository;
     private final UserLevelProgressRepository userLevelProgressRepository;
+    private final UserLanguageRepository userLanguageRepository;
 
     public WorldsResponseDto getAllWorlds(Long userId,Long languageId, Difficulty difficulty) {
 
@@ -51,14 +55,14 @@ public class WorldService {
         return new WorldsResponseDto(worldDtos.size(),worldDtos);
     }
 
-    public WorldLevelsResponseDto getWorldLevels(Long userId , Long worldId, Long languageId) {
-        if(languageId < 1) {
-            throw new InvalidLanguageIdException("Invalid languageId");
-        }
+    public WorldLevelsResponseDto getWorldLevels(Long userId , Long worldId) {
+        UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
+
         World world = worldRepository.findById(worldId)
                 .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " is not exist"));
 
-        List<UserLevelProgress> unlockedLevels = userLevelProgressRepository.findUserProgressLevels(userId,worldId,languageId);
+        List<UserLevelProgress> unlockedLevels = userLevelProgressRepository.findUserProgressLevels(userId,worldId,userLanguage.getLanguage().getId());
         List<WorldLevel> allLevels = worldLevelRepository.findWorldLevels(worldId);
         Map<Long, UserLevelProgress> progressMap =
                 unlockedLevels.stream()

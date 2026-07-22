@@ -42,10 +42,9 @@ public class WorldController {
 
     @GetMapping(value = "/{worldId}/levels" , version = "v1")
     ResponseEntity<SuccessResponse<WorldLevelsResponseDto>> getLevelsOfAWorld(@AuthenticationPrincipal UserPrinciple userPrinciple ,
-                                                                              @PathVariable("worldId") Long worldId,
-                                                                              @RequestParam("languageId") Long languageId) {
+                                                                              @PathVariable("worldId") Long worldId) {
 
-        WorldLevelsResponseDto worldsResponseDto = worldService.getWorldLevels(userPrinciple.user().getId(), worldId,languageId);
+        WorldLevelsResponseDto worldsResponseDto = worldService.getWorldLevels(userPrinciple.user().getId(), worldId);
         return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
     }
 
