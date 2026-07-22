@@ -21,6 +21,7 @@ import io.jsonwebtoken.JwtException;
 import org.springframework.security.authentication.BadCredentialsException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
+import gov.jets.iti.LinguaQuest.exception.profile.ProfileAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -172,6 +173,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ProfileAlreadyCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleProfileAlreadyCompleted(ProfileAlreadyCompletedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "PROFILE_ALREADY_COMPLETED", ex.getMessage(), request);
     }
 
 
