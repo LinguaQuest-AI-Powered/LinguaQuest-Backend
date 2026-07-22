@@ -36,18 +36,18 @@ public class WorldService {
     private final UserLevelProgressRepository userLevelProgressRepository;
     private final UserLanguageRepository userLanguageRepository;
 
-    public WorldsResponseDto getAllWorlds(Long userId,Long languageId, Difficulty difficulty) {
+    public WorldsResponseDto getAllWorlds(Long userId, Difficulty difficulty) {
 
-        if(languageId < 1) {
-            throw new InvalidLanguageIdException("Invalid languageId");
-        }
+
+        UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
 
         List<World> worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
         List<WorldDto> worldDtos = new ArrayList<>();
 
         for(World world : worldDtoList) {
             long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
-            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),languageId);
+            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),userLanguage.getLanguage().getId());
             long progressPercent = (worldCompletedLevels* 100) / worldLevelCount;
             WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent);
             worldDtos.add(worldDto);
