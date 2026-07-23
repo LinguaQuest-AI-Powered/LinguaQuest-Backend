@@ -58,4 +58,16 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
             @Param("userId") Long userId,
             @Param("worldId") Long worldId,
             @Param("levelId") Long levelId);
+
+    @Query("""
+    SELECT ulp FROM UserLevelProgress ulp
+    JOIN FETCH ulp.word w
+    WHERE ulp.user.id = :userId
+      AND ulp.worldLevel.id = :levelId
+      AND w.language.id = :languageId
+    """)
+    Optional<UserLevelProgress> findByUserIdAndLevelIdAndLanguageId(
+            @Param("userId") Long userId,
+            @Param("levelId") Long levelId,
+            @Param("languageId") Long languageId);
 }

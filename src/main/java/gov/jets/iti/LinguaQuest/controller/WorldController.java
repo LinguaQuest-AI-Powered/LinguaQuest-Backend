@@ -51,6 +51,30 @@ public class WorldController {
         return ResponseEntity.ok(new SuccessResponse<>(true,worldsResponseDto));
     }
 
+    @PostMapping(value = "/{worldId}/levels/{levelId}/start", version = "v1")
+    public ResponseEntity<SuccessResponse<StartLevelResponse>> startLevel(
+            @PathVariable Long worldId,
+            @PathVariable Long levelId,
+            @AuthenticationPrincipal UserPrinciple principle) {
+
+        StartLevelResponse data = gameService.startLevel(
+                principle.user().getId(), worldId, levelId);
+
+        return ResponseEntity.ok(new SuccessResponse<>(true, data));
+    }
+
+    @PutMapping(value = "/{worldId}/levels/{levelId}/change-word", version = "v1")
+    public ResponseEntity<SuccessResponse<StartLevelResponse>> changeWord(
+            @PathVariable Long worldId,
+            @PathVariable Long levelId,
+            @AuthenticationPrincipal UserPrinciple principle) {
+
+        StartLevelResponse data = gameService.changeWord(
+                principle.user().getId(), worldId, levelId);
+
+        return ResponseEntity.ok(new SuccessResponse<>(true, data));
+    }
+
     @PostMapping(value = "/{worldId}/levels/{levelId}/verify" , version = "v1",
                  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SuccessResponse<VerifyImageResponse>> verifyImage(
