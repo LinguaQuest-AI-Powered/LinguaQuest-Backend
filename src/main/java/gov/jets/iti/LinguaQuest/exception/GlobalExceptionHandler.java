@@ -17,8 +17,11 @@ import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
+import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.NoMoreWordsException;
+import gov.jets.iti.LinguaQuest.exception.world.ProgressNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
@@ -219,6 +222,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LevelLockedException.class)
     public ResponseEntity<ErrorResponse> handleLevelLocked(LevelLockedException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_LOCKED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ProgressNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProgressNotFound(ProgressNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "PROGRESS_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(NoMoreWordsException.class)
+    public ResponseEntity<ErrorResponse> handleNoMoreWords(NoMoreWordsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "NO_MORE_WORDS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LevelAlreadyCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleLevelAlreadyCompleted(LevelAlreadyCompletedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_ALREADY_COMPLETED", ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
