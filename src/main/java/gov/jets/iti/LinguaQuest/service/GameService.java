@@ -98,7 +98,7 @@ public class GameService {
 
         int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
         Page<Word> page = wordRepository.findUnusedWords(userId, worldId, languageId, PageRequest.of(randomOffset, 1));
-        Word word = page.getContent().get(0);
+        Word word = page.getContent().getFirst();
 
         UserLevelProgress progress = UserLevelProgress.builder()
                 .user(activeUserLanguage.getUser())
@@ -147,7 +147,7 @@ public class GameService {
         int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
         Page<Word> page = wordRepository.findUnusedWordsExcludingCurrent(
                 userId, worldId, languageId, currentWordId, PageRequest.of(randomOffset, 1));
-        Word newWord = page.getContent().get(0);
+        Word newWord = page.getContent().getFirst();
 
         progress.setWord(newWord);
 
