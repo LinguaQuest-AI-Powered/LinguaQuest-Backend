@@ -22,10 +22,9 @@ public class LeaderboardController {
     final private LeaderBoardService leaderBoardService;
     @GetMapping(version = "v1")
     ResponseEntity<SuccessResponse<LeaderBoardResponseDto>> getLeaderBoard(@AuthenticationPrincipal UserPrinciple userPrinciple,
-                                                     @RequestParam("scope") LeaderboardType leaderboardType,
                                                      @RequestParam("page") Integer page,
                                                      @RequestParam("limit") Integer limit) {
-        LeaderBoardResponseDto leaderBoardResponseDto = leaderBoardService.getLeaderBoard(userPrinciple,leaderboardType,page,limit);
+        LeaderBoardResponseDto leaderBoardResponseDto = leaderBoardService.getLeaderBoard(userPrinciple,page,limit);
         return ResponseEntity.ok(new SuccessResponse<>(true,leaderBoardResponseDto));
     }
 }

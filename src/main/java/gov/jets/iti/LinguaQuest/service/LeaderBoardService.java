@@ -19,7 +19,7 @@ public class LeaderBoardService {
 
     private final UserRepository userRepository;
 
-    public LeaderBoardResponseDto getLeaderBoard(UserPrinciple userPrinciple, LeaderboardType leaderboardType, Integer page, Integer limit) {
+    public LeaderBoardResponseDto getLeaderBoard(UserPrinciple userPrinciple, Integer page, Integer limit) {
 
         List<User> topThreeUsers = userRepository.findLeaderboard(PageRequest.of(0,3)).getContent();
         List<UserRankDto> topThreeUserRankDtos = toUserRankDtoList(topThreeUsers,1,userPrinciple.user().getId());
