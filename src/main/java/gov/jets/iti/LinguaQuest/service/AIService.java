@@ -1,6 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +56,7 @@ public class AIService {
 
     private Resource toResource(MultipartFile image) {
         try {
-            return new org.springframework.core.io.ByteArrayResource(image.getBytes());
+            return new ByteArrayResource(image.getBytes());
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to read uploaded image bytes", e);
         }
