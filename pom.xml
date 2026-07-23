@@ -136,10 +136,15 @@
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.39.0</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.ai</groupId>-->
+<!--			<artifactId>spring-ai-starter-model-google-genai</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-model-google-genai</artifactId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>
