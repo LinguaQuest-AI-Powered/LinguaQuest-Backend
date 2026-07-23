@@ -16,8 +16,11 @@ import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
+import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.NoMoreWordsException;
+import gov.jets.iti.LinguaQuest.exception.world.ProgressNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
@@ -107,6 +110,48 @@ public class GameService {
         userLevelProgressRepository.save(progress);
 
         return new StartLevelResponse(word.getText());
+    }
+
+    @Transactional
+    public StartLevelResponse changeWord(Long userId, Long worldId, Long levelId) {
+        UserLanguage activeUserLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() -> new NoActiveLanguageException("User with id " + userId + " doesn't have an active language"));
+
+        Long languageId = activeUserLanguage.getLanguage().getId();
+
+        worldRepository.findById(worldId)
+                .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " does not exist"));
+
+        worldLevelRepository.findByIdAndWorldId(levelId, worldId)
+                .orElseThrow(() -> new LevelNotFoundException("Level with id " + levelId + " does not exist in world " + worldId));
+
+        UserLevelProgress progress = userLevelProgressRepository
+                .findByUserIdAndLevelIdAndLanguageId(userId, levelId, languageId)
+                .orElseThrow(() -> new ProgressNotFoundException("You haven't started this level yet"));
+
+        if (progress.getStatus() == LevelStatus.COMPLETED) {
+            throw new LevelAlreadyCompletedException("Level is already completed");
+        }
+
+        if (progress.getStatus() != LevelStatus.INPROGRESS) {
+            throw new ProgressNotFoundException("You haven't started this level yet");
+        }
+
+        Long currentWordId = progress.getWord().getId();
+
+        long unusedCount = wordRepository.countUnusedWordsExcludingCurrent(userId, worldId, languageId, currentWordId);
+        if (unusedCount == 0) {
+            throw new NoMoreWordsException("There are no other new words available in this world.");
+        }
+
+        int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
+        Page<Word> page = wordRepository.findUnusedWordsExcludingCurrent(
+                userId, worldId, languageId, currentWordId, PageRequest.of(randomOffset, 1));
+        Word newWord = page.getContent().get(0);
+
+        progress.setWord(newWord);
+
+        return new StartLevelResponse(newWord.getText());
     }
 
     @Transactional
