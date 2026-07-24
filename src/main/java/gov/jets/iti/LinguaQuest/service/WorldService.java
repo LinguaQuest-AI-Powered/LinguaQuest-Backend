@@ -41,14 +41,19 @@ public class WorldService {
 
         UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
                 .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
-
-        List<World> worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
+        List<World> worldDtoList;
+        if(difficulty == Difficulty.ALL) {
+            worldDtoList = worldRepository.findAll();
+        }else {
+            worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
+        }
         List<WorldDto> worldDtos = new ArrayList<>();
 
         for(World world : worldDtoList) {
             long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
             long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),userLanguage.getLanguage().getId());
-            long progressPercent = (worldCompletedLevels* 100) / worldLevelCount;
+            long progressPercent = worldLevelCount != 0 ? ((worldCompletedLevels* 100) / worldLevelCount) : 0 ;
+
             WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent);
             worldDtos.add(worldDto);
         }
