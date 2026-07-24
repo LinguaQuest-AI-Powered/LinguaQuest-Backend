@@ -41,8 +41,12 @@ public class WorldService {
 
         UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
                 .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
-
-        List<World> worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
+        List<World> worldDtoList;
+        if(difficulty == Difficulty.ALL) {
+            worldDtoList = worldRepository.findAll();
+        }else {
+            worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
+        }
         List<WorldDto> worldDtos = new ArrayList<>();
 
         for(World world : worldDtoList) {
