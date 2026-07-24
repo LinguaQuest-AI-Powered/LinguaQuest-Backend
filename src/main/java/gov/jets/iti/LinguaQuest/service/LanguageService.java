@@ -5,8 +5,10 @@ import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
+import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyNativeException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
@@ -120,5 +122,19 @@ public class LanguageService {
                 .toList();
 
         return new AvailableLanguagesResponse(languages);
+    }
+
+    @Transactional
+    public NativeLanguageDto setNativeLanguage(Long userId, Long languageId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EmailNotFoundException("User not found"));
+        Language language = languageRepository.findById(languageId).orElseThrow(
+                () -> new LanguageNotFoundException("The specified language does not exist"));
+        if (user.getNativeLanguage() != null && user.getNativeLanguage().getId().equals(languageId)) {
+            throw new LanguageAlreadyNativeException("This language is already set as your native language");
+        }
+        user.setNativeLanguage(language);
+        userRepository.save(user);
+        return new NativeLanguageDto(language.getId(),language.getName(),language.getCode(),language.getImageUrl());
     }
 }

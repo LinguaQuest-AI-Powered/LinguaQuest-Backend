@@ -8,10 +8,7 @@ import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
-import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
-import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
-import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
+import gov.jets.iti.LinguaQuest.exception.language.*;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -146,6 +143,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(LanguageAlreadyNativeException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageAlreadyNativeException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "SAME_NATIVE_LANGUAGE", ex.getMessage(), request);
+    }
+
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingRequestParameter(
@@ -240,6 +242,10 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "INSUFFICIENT_BALANCE", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(DailyRewardAlreadyClaimedException.class)
+    public ResponseEntity<ErrorResponse> handleDailyRewardAlreadyClaimed(DailyRewardAlreadyClaimedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "DAILY_REWARD_ALREADY_CLAIMED", ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
