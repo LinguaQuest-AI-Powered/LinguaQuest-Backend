@@ -15,6 +15,15 @@ import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
+import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
+import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
+import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
+import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.NoMoreWordsException;
+import gov.jets.iti.LinguaQuest.exception.world.ProgressNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.WorldCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -24,8 +33,6 @@ import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
 import gov.jets.iti.LinguaQuest.exception.profile.ProfileAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -35,10 +42,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @Slf4j
 @RestControllerAdvice
@@ -185,6 +190,51 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoActiveLanguageException(NoActiveLanguageException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "NO_ACTIVE_LANGUAGE", ex.getMessage(), request);
     }
+    @ExceptionHandler(ActiveLevelNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleActiveLevelNotFound(ActiveLevelNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "ACTIVE_LEVEL_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(UserLanguageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserLanguageNotFound(UserLanguageNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "USER_LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidImage(InvalidImageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_IMAGE", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LevelNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLevelNotFound(LevelNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(WorldCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleWorldCompleted(WorldCompletedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "WORLD_COMPLETED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LevelLockedException.class)
+    public ResponseEntity<ErrorResponse> handleLevelLocked(LevelLockedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_LOCKED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ProgressNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProgressNotFound(ProgressNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "PROGRESS_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(NoMoreWordsException.class)
+    public ResponseEntity<ErrorResponse> handleNoMoreWords(NoMoreWordsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "NO_MORE_WORDS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LevelAlreadyCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleLevelAlreadyCompleted(LevelAlreadyCompletedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_ALREADY_COMPLETED", ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
