@@ -183,6 +183,14 @@ public class GameService {
                     userProgressUpdaterUtil.computeProgressPercentage(user.getXp()));
         }
 
+        if(progress.getStatus() == LevelStatus.COMPLETED) {
+            return new VerifyImageResponse(
+                    true,
+                    0,
+                    0,
+                    user.getLevel(),
+                    userProgressUpdaterUtil.computeProgressPercentage(user.getXp()));
+        }
         Difficulty worldDifficulty = progress.getWorldLevel().getWorld().getDifficulty();
         RewardResult reward = rewardCalculator.calculate(word.getDifficulty(), worldDifficulty);
 

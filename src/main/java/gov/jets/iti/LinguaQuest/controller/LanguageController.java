@@ -2,10 +2,7 @@ package gov.jets.iti.LinguaQuest.controller;
 
 import gov.jets.iti.LinguaQuest.dto.request.AddLanguagesRequest;
 import gov.jets.iti.LinguaQuest.dto.request.SetActiveLanguageRequest;
-import gov.jets.iti.LinguaQuest.dto.response.ActiveLanguageResponse;
-import gov.jets.iti.LinguaQuest.dto.response.AvailableLanguagesResponse;
-import gov.jets.iti.LinguaQuest.dto.response.MyLanguagesResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.service.LanguageService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.validation.Valid;
@@ -43,4 +40,11 @@ public class LanguageController {
         ActiveLanguageResponse response = languageService.setActiveLanguage(principle.user().getId(), request.languageId());
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
+
+    @PatchMapping("/native")
+    public ResponseEntity<SuccessResponse<NativeLanguageDto>> setNativeLanguage(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid SetActiveLanguageRequest request){
+        NativeLanguageDto nativeLanguageDto = languageService.setNativeLanguage(principle.user().getId(), request.languageId());
+        return ResponseEntity.ok(new SuccessResponse<>(true, nativeLanguageDto));
+    }
+
 }
