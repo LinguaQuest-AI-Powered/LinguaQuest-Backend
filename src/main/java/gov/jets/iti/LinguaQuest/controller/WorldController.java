@@ -35,7 +35,7 @@ public class WorldController {
     @GetMapping(version = "v1")
     ResponseEntity<SuccessResponse<WorldsResponseDto>> getAllUserWorlds(@AuthenticationPrincipal UserPrinciple userPrinciple,
                                                                         @RequestParam("difficulty")
-                                                                        @Pattern(regexp = "EASY|MEDIUM|HARD")
+                                                                        @Pattern(regexp = "EASY|MEDIUM|HARD|ALL")
                                                                         @NotEmpty(message = "difficulty is required")
                                                                         String difficulty){
         Difficulty diff = Difficulty.valueOf(difficulty);
@@ -92,7 +92,7 @@ public class WorldController {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleLanguageNotFound(ConstraintViolationException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "difficulty must have a value of this set (EASY - MEDIUM - HARD)", request);
+        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "difficulty must have a value of this set (EASY - MEDIUM - HARD - ALL)", request);
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {

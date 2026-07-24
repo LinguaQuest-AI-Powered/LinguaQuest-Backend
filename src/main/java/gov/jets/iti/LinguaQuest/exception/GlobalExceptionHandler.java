@@ -235,6 +235,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_ALREADY_COMPLETED", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOperationException(InvalidOperationException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "INSUFFICIENT_BALANCE", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(DailyRewardAlreadyClaimedException.class)
     public ResponseEntity<ErrorResponse> handleDailyRewardAlreadyClaimed(DailyRewardAlreadyClaimedException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "DAILY_REWARD_ALREADY_CLAIMED", ex.getMessage(), request);
