@@ -8,10 +8,7 @@ import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidRefreshTokenException;
-import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
-import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
-import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
+import gov.jets.iti.LinguaQuest.exception.language.*;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
@@ -144,6 +141,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LanguageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "LANGUAGE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(LanguageAlreadyNativeException.class)
+    public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageAlreadyNativeException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "SAME_NATIVE_LANGUAGE", ex.getMessage(), request);
     }
 
 
