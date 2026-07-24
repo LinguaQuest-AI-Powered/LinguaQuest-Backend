@@ -240,6 +240,10 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "INSUFFICIENT_BALANCE", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(DailyRewardAlreadyClaimedException.class)
+    public ResponseEntity<ErrorResponse> handleDailyRewardAlreadyClaimed(DailyRewardAlreadyClaimedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "DAILY_REWARD_ALREADY_CLAIMED", ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
