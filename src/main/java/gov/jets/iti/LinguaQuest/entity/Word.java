@@ -8,7 +8,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "words")
+@Table(
+        name = "words",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "word_code")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +31,9 @@ public class Word {
 
     @Column(nullable = false, length = 100)
     private String text;
+
+    @Column(name = "word_code", nullable = false, unique = true, length = 120)
+    private String wordCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
