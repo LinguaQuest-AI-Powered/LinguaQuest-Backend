@@ -13,6 +13,7 @@ import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
+import gov.jets.iti.LinguaQuest.exception.world.InsufficientCoinsException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
@@ -319,6 +320,7 @@ class GameServiceTest {
         @DisplayName("Should successfully change the current word for an INPROGRESS level")
         void changeWord_Success() {
             // Arrange
+            testUser.setCoins(100);
             UserLevelProgress existingProgress = UserLevelProgress.builder()
                     .id(200L)
                     .user(testUser)
@@ -352,7 +354,37 @@ class GameServiceTest {
             // Assert
             assertThat(response).isNotNull();
             assertThat(response.targetWord()).isEqualTo("Platano");
+            assertThat(response.coins()).isEqualTo(50);
             assertThat(existingProgress.getWord()).isEqualTo(newWord);
+            assertThat(testUser.getCoins()).isEqualTo(50);
+        }
+
+        @Test
+        @DisplayName("Should throw InsufficientCoinsException when user coins are less than 50")
+        void changeWord_InsufficientCoins_ThrowsException() {
+            // Arrange
+            testUser.setCoins(10);
+            UserLevelProgress existingProgress = UserLevelProgress.builder()
+                    .id(200L)
+                    .user(testUser)
+                    .worldLevel(testWorldLevel)
+                    .status(LevelStatus.INPROGRESS)
+                    .word(testWord)
+                    .build();
+
+            when(userLanguageRepository.findActiveByUserIdWithLanguage(userId))
+                    .thenReturn(Optional.of(activeUserLanguage));
+            when(worldRepository.findById(worldId))
+                    .thenReturn(Optional.of(testWorld));
+            when(worldLevelRepository.findByIdAndWorldId(levelId, worldId))
+                    .thenReturn(Optional.of(testWorldLevel));
+            when(userLevelProgressRepository.findByUserIdAndLevelIdAndLanguageId(userId, levelId, languageId))
+                    .thenReturn(Optional.of(existingProgress));
+
+            // Act & Assert
+            assertThatThrownBy(() -> gameService.changeWord(userId, worldId, levelId))
+                    .isInstanceOf(InsufficientCoinsException.class)
+                    .hasMessageContaining("Insufficient coins");
         }
 
         @Test
@@ -407,6 +439,7 @@ class GameServiceTest {
         @DisplayName("Should throw NoMoreWordsException when no other unused words remain")
         void changeWord_NoMoreWords_ThrowsException() {
             // Arrange
+            testUser.setCoins(100);
             UserLevelProgress existingProgress = UserLevelProgress.builder()
                     .id(200L)
                     .user(testUser)
