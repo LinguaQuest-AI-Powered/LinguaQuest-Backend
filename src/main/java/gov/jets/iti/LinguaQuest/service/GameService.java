@@ -15,6 +15,7 @@ import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.InsufficientCoinsException;
 import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
@@ -45,6 +46,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 public class GameService {
+    
+    private static final int CHANGE_WORD_COIN_COST = 50;
     
     private final UserLevelProgressRepository userLevelProgressRepository;
     private final UserLanguageRepository userLanguageRepository;
@@ -139,6 +142,11 @@ public class GameService {
 
         Long currentWordId = progress.getWord().getId();
 
+        User user = progress.getUser();
+        if (user == null || user.getCoins() == null || user.getCoins() < CHANGE_WORD_COIN_COST) {
+            throw new InsufficientCoinsException("Insufficient coins to change the word");
+        }
+
         long unusedCount = wordRepository.countUnusedWordsExcludingCurrent(userId, worldId, languageId, currentWordId);
         if (unusedCount == 0) {
             throw new NoMoreWordsException("There are no other new words available in this world.");
@@ -150,8 +158,9 @@ public class GameService {
         Word newWord = page.getContent().getFirst();
 
         progress.setWord(newWord);
+        user.setCoins(user.getCoins() - CHANGE_WORD_COIN_COST);
 
-        return new StartLevelResponse(newWord.getText());
+        return new StartLevelResponse(newWord.getText(), user.getCoins());
     }
 
     @Transactional
