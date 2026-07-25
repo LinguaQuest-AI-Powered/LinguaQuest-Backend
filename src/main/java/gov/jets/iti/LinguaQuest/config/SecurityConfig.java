@@ -42,7 +42,7 @@ public class SecurityConfig {
                 })
                 .addFilterBefore(jwtValidationFilter, BasicAuthenticationFilter.class)
                 .formLogin(flc -> flc.disable())
-                .httpBasic(withDefaults())
+                .httpBasic(hbc -> hbc.disable())
                 .build();
     }
 
