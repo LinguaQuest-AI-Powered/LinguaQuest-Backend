@@ -13,6 +13,7 @@ import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
 import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.InsufficientCoinsException;
 import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
 import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
@@ -235,6 +236,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LevelAlreadyCompletedException.class)
     public ResponseEntity<ErrorResponse> handleLevelAlreadyCompleted(LevelAlreadyCompletedException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "LEVEL_ALREADY_COMPLETED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InsufficientCoinsException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientCoins(InsufficientCoinsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "INSUFFICIENT_COINS", ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidOperationException.class)
