@@ -12,17 +12,7 @@ import gov.jets.iti.LinguaQuest.exception.language.*;
 import gov.jets.iti.LinguaQuest.exception.otp.InvalidOtpException;
 import gov.jets.iti.LinguaQuest.exception.otp.MaxAttemptsExceededException;
 import gov.jets.iti.LinguaQuest.exception.otp.OtpCooldownException;
-import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.InsufficientCoinsException;
-import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.NoMoreWordsException;
-import gov.jets.iti.LinguaQuest.exception.world.ProgressNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.WorldCompletedException;
-import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.world.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -251,6 +241,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DailyRewardAlreadyClaimedException.class)
     public ResponseEntity<ErrorResponse> handleDailyRewardAlreadyClaimed(DailyRewardAlreadyClaimedException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "DAILY_REWARD_ALREADY_CLAIMED", ex.getMessage(), request);
+    }
+    @ExceptionHandler(HintAlreadyUsedException.class)
+    public ResponseEntity<ErrorResponse> handleHintAlreadyUsed(HintAlreadyUsedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "HINT_ALREADY_USED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(NativeLanguageNotSetException.class)
+    public ResponseEntity<ErrorResponse> handleNativeLanguageNotSet(NativeLanguageNotSetException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "NATIVE_LANGUAGE_NOT_SET", ex.getMessage(), request);
     }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
