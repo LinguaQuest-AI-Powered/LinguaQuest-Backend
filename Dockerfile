@@ -19,5 +19,5 @@ USER spring:spring
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
-ENV JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport -Xmx192m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=192m -XX:+UseStringDeduplication"
+ENV JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
