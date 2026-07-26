@@ -1,6 +1,5 @@
 package gov.jets.iti.LinguaQuest.repository;
 
-import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.WordHint;
 import org.springframework.data.jpa.repository.JpaRepository;
 
