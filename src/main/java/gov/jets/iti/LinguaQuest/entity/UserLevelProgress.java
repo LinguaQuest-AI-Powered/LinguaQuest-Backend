@@ -40,4 +40,8 @@ public class UserLevelProgress {
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    @Column(name = "hint_used", nullable = false)
+    @Builder.Default
+    private boolean hintUsed = false;
 }
