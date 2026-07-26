@@ -20,4 +20,5 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 ENV JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENV JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport -Xmx350m -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -XX:+UseStringDeduplication"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
