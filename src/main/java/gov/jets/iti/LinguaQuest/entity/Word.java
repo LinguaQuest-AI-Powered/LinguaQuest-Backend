@@ -27,6 +27,9 @@ public class Word {
     @Column(nullable = false, length = 100)
     private String text;
 
+    @Column(name = "word_code", nullable = false, length = 120)
+    private String wordCode;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Difficulty difficulty;
