@@ -1,35 +1,14 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import gov.jets.iti.LinguaQuest.dto.RewardResult;
-import gov.jets.iti.LinguaQuest.dto.response.LevelDto;
-import gov.jets.iti.LinguaQuest.dto.response.StartLevelResponse;
-import gov.jets.iti.LinguaQuest.dto.response.VerifyImageResponse;
-import gov.jets.iti.LinguaQuest.dto.response.WorldLevelsResponseDto;
-import gov.jets.iti.LinguaQuest.entity.User;
-import gov.jets.iti.LinguaQuest.entity.UserLanguage;
-import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
-import gov.jets.iti.LinguaQuest.entity.Word;
-import gov.jets.iti.LinguaQuest.entity.World;
-import gov.jets.iti.LinguaQuest.entity.WorldLevel;
+import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.entity.*;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
+import gov.jets.iti.LinguaQuest.exception.language.NativeLanguageNotSetException;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
-import gov.jets.iti.LinguaQuest.exception.world.ActiveLevelNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.InsufficientCoinsException;
-import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelAlreadyCompletedException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelLockedException;
-import gov.jets.iti.LinguaQuest.exception.world.LevelNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.NoMoreWordsException;
-import gov.jets.iti.LinguaQuest.exception.world.ProgressNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.UserLanguageNotFoundException;
-import gov.jets.iti.LinguaQuest.exception.world.WorldCompletedException;
-import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
-import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
-import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
-import gov.jets.iti.LinguaQuest.repository.WordRepository;
-import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
-import gov.jets.iti.LinguaQuest.repository.WorldRepository;
+import gov.jets.iti.LinguaQuest.exception.world.*;
+import gov.jets.iti.LinguaQuest.repository.*;
 import gov.jets.iti.LinguaQuest.util.RewardCalculatorUtil;
 import gov.jets.iti.LinguaQuest.util.UserProgressUpdaterUtil;
 import jakarta.transaction.Transactional;
@@ -48,7 +27,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameService {
     
     private static final int CHANGE_WORD_COIN_COST = 50;
-    
+    private static final int HINT_COIN_COST = 30;
+
     private final UserLevelProgressRepository userLevelProgressRepository;
     private final UserLanguageRepository userLanguageRepository;
     private final WorldRepository worldRepository;
@@ -58,6 +38,7 @@ public class GameService {
     private final AIService aiService;
     private final RewardCalculatorUtil rewardCalculator;
     private final UserProgressUpdaterUtil userProgressUpdaterUtil;
+    private final WordHintRepository wordHintRepository;
 
     @Transactional
     public StartLevelResponse startLevel(Long userId, Long worldId, Long levelId) {
@@ -216,6 +197,50 @@ public class GameService {
                 reward.coins(),
                 user.getLevel(),
                 userProgressUpdaterUtil.computeProgressPercentage(user.getXp()));
+    }
+
+    @Transactional
+    public HintResponse getHint(Long userId, Long worldId, Long levelId) {
+        worldRepository.findById(worldId)
+                .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " does not exist"));
+        worldLevelRepository.findByIdAndWorldId(levelId, worldId)
+                .orElseThrow(() -> new LevelNotFoundException("Level with id " + levelId + " does not exist in world " + worldId));
+        UserLevelProgress progress = userLevelProgressRepository
+                .findInProgressOrCompletedByUserIdAndWorldIdAndLevelId(userId, worldId, levelId)
+                .orElseThrow(() -> new ActiveLevelNotFoundException(
+                        "No in-progress or completed level found for user " + userId +
+                                " in world " + worldId + ", level " + levelId));
+        if(progress.isHintUsed()){
+            throw new HintAlreadyUsedException("You have already used your hint for this level");
+        }
+        User user = progress.getUser();
+        if (user.getCoins() == null || user.getCoins() < HINT_COIN_COST) {
+            throw new InsufficientCoinsException("You do not have enough coins to buy a hint");
+        }
+        Language nativeLanguage = user.getNativeLanguage();
+        if (nativeLanguage == null) {
+            throw new NativeLanguageNotSetException("User has no native language set");
+        }
+        Word word = progress.getWord();
+        WordHint wordHint = wordHintRepository
+                .findByWordCodeAndLanguageId(word.getWordCode(), nativeLanguage.getId())
+                .orElseGet(() -> {
+                    String hintText = aiService.generateHint(word.getText(), nativeLanguage.getName());
+                    WordHint newHint = WordHint.builder()
+                            .wordCode(word.getWordCode())
+                            .language(nativeLanguage)
+                            .hintText(hintText)
+                            .build();
+                    return wordHintRepository.save(newHint);
+                });
+        user.setCoins(user.getCoins() - HINT_COIN_COST);
+        progress.setHintUsed(true);
+
+        return new HintResponse(
+                wordHint.getHintText(),
+                HINT_COIN_COST,
+                user.getCoins()
+        );
     }
 
     private void applyLanguageProgress(UserLanguage userLanguage, RewardResult reward) {
