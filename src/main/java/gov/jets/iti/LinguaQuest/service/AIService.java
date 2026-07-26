@@ -54,6 +54,18 @@ public class AIService {
                 : MimeTypeUtils.IMAGE_JPEG;
     }
 
+    public String generateHint(String wordText, String nativeLanguageName) {
+        String promptText = """
+            Generate a short, simple hint in %s for a language learner trying to guess a word.
+            The word/concept is: "%s"
+            The hint must describe the word without stating it directly, and must be written entirely in %s.
+            Respond with ONLY the hint text — no quotes, no translation, no explanation.
+            """.formatted(nativeLanguageName, wordText, nativeLanguageName);
+
+        ChatResponse response = chatClient.prompt(new Prompt(new UserMessage(promptText))).call().chatResponse();
+        return response.getResult().getOutput().getText().trim();
+    }
+
     private Resource toResource(MultipartFile image) {
         try {
             return new ByteArrayResource(image.getBytes());
