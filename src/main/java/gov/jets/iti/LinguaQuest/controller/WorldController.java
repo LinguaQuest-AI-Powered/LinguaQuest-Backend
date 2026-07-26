@@ -89,6 +89,15 @@ public class WorldController {
         return ResponseEntity.ok(new SuccessResponse<>(true, data));
     }
 
+    @GetMapping("/{worldId}/levels/{levelId}/hint")
+    public ResponseEntity<SuccessResponse<HintResponse>> getHint(
+            @PathVariable Long worldId,
+            @PathVariable Long levelId,
+            @AuthenticationPrincipal UserPrinciple principal) {
+
+        HintResponse response = gameService.getHint(principal.user().getId(), worldId, levelId);
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleLanguageNotFound(ConstraintViolationException ex, HttpServletRequest request) {
