@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.repository;
 
+import gov.jets.iti.LinguaQuest.dto.SolvedWordDto;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -70,4 +71,28 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
             @Param("userId") Long userId,
             @Param("levelId") Long levelId,
             @Param("languageId") Long languageId);
+
+    @Query(value = """
+    SELECT
+        w.text          AS word,
+        nw.text         AS nativeWord,
+        wo.id           AS worldId,
+        wo.name         AS worldName,
+        wo.image_url    AS worldImageUrl
+    FROM user_level_progress ulp
+    JOIN words w         ON w.id = ulp.word_id
+    JOIN words nw        ON nw.word_code = w.word_code
+                         AND nw.language_id = :nativeLanguageId
+    JOIN world_levels wl ON wl.id = ulp.level_id
+    JOIN worlds wo       ON wo.id = wl.world_id
+    WHERE ulp.user_id = :userId
+      AND w.language_id = :languageId
+      AND ulp.status = 'COMPLETED'
+    ORDER BY ulp.completed_at DESC
+    """, nativeQuery = true)
+    List<SolvedWordDto> findSolvedWords(
+            @Param("userId") Long userId,
+            @Param("languageId") Long languageId,
+            @Param("nativeLanguageId") Long nativeLanguageId
+    );
 }
