@@ -150,8 +150,14 @@ public class GameService {
             throw new InvalidImageException("Uploaded image is empty or missing.");
         }
 
+        UserLanguage userActiveLanguage = userLanguageRepository
+                .findActiveByUserIdWithLanguage(userId) // or however you fetch the active one
+                .orElseThrow(() -> new UserLanguageNotFoundException(
+                        "User " + userId + " has no active language"));
+
         UserLevelProgress progress = userLevelProgressRepository
-                .findInProgressOrCompletedByUserIdAndWorldIdAndLevelId(userId, worldId, levelId)
+                .findInProgressOrCompletedByUserIdAndWorldIdAndLevelIdAndLanguageId(
+                        userId, worldId, levelId, userActiveLanguage.getLanguage().getId())
                 .orElseThrow(() -> new ActiveLevelNotFoundException(
                         "No in-progress or completed level found for user " + userId +
                                 " in world " + worldId + ", level " + levelId));
@@ -205,11 +211,19 @@ public class GameService {
                 .orElseThrow(() -> new WorldNotFoundException("World with id " + worldId + " does not exist"));
         worldLevelRepository.findByIdAndWorldId(levelId, worldId)
                 .orElseThrow(() -> new LevelNotFoundException("Level with id " + levelId + " does not exist in world " + worldId));
+
+        UserLanguage userActiveLanguage = userLanguageRepository
+                .findActiveByUserIdWithLanguage(userId)
+                .orElseThrow(() -> new UserLanguageNotFoundException(
+                        "User " + userId + " has no active language"));
+
         UserLevelProgress progress = userLevelProgressRepository
-                .findInProgressOrCompletedByUserIdAndWorldIdAndLevelId(userId, worldId, levelId)
+                .findInProgressOrCompletedByUserIdAndWorldIdAndLevelIdAndLanguageId(
+                        userId, worldId, levelId, userActiveLanguage.getLanguage().getId())
                 .orElseThrow(() -> new ActiveLevelNotFoundException(
                         "No in-progress or completed level found for user " + userId +
                                 " in world " + worldId + ", level " + levelId));
+
         if(progress.isHintUsed()){
             throw new HintAlreadyUsedException("You have already used your hint for this level");
         }
