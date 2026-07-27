@@ -47,19 +47,20 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
     @Query("""
     SELECT ulp FROM UserLevelProgress ulp
     JOIN FETCH ulp.word w
-    JOIN FETCH w.language
+    JOIN FETCH w.language lang
     JOIN FETCH ulp.worldLevel wl
     JOIN FETCH wl.world
     WHERE ulp.user.id = :userId
       AND wl.world.id = :worldId
       AND wl.id = :levelId
-      AND ( ulp.status = LevelStatus.INPROGRESS OR ulp.status = LevelStatus.COMPLETED)
+      AND lang.id = :languageId
+      AND (ulp.status = LevelStatus.INPROGRESS OR ulp.status = LevelStatus.COMPLETED)
     """)
-    Optional<UserLevelProgress> findInProgressOrCompletedByUserIdAndWorldIdAndLevelId(
+    Optional<UserLevelProgress> findInProgressOrCompletedByUserIdAndWorldIdAndLevelIdAndLanguageId(
             @Param("userId") Long userId,
             @Param("worldId") Long worldId,
-            @Param("levelId") Long levelId);
-
+            @Param("levelId") Long levelId,
+            @Param("languageId") Long languageId);
     @Query("""
     SELECT ulp FROM UserLevelProgress ulp
     JOIN FETCH ulp.word w
