@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.response.DailyRewardClaimResponse;
-import gov.jets.iti.LinguaQuest.dto.response.DailyRewardStatusResponse;
+import gov.jets.iti.LinguaQuest.dto.reward.DailyRewardClaimResponse;
+import gov.jets.iti.LinguaQuest.dto.reward.DailyRewardStatusResponse;
 import gov.jets.iti.LinguaQuest.entity.DailyRewardTier;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserDailyRewardClaim;

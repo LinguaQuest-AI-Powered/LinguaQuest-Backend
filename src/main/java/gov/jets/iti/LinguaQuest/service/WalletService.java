@@ -1,14 +1,13 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.response.AdjustWalletResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.WalletResponseDto;
+import gov.jets.iti.LinguaQuest.dto.wallet.AdjustWalletResponseDto;
+import gov.jets.iti.LinguaQuest.dto.wallet.WalletResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.exception.InvalidOperationException;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.intellij.lang.annotations.PrintFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 

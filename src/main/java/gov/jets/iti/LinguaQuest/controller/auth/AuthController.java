@@ -1,11 +1,18 @@
 package gov.jets.iti.LinguaQuest.controller.auth;
 
 
-import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
-import gov.jets.iti.LinguaQuest.dto.request.LogoutRequestDto;
-import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
-import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.auth.response.AuthResponseDto;
+import gov.jets.iti.LinguaQuest.dto.auth.response.LogoutResponseDto;
+import gov.jets.iti.LinguaQuest.dto.auth.response.RefreshTokenResponseDto;
+import gov.jets.iti.LinguaQuest.dto.auth.response.RegisterResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorDetails;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.language.AvailableLanguagesResponse;
+import gov.jets.iti.LinguaQuest.dto.auth.request.LoginRequestDto;
+import gov.jets.iti.LinguaQuest.dto.auth.request.LogoutRequestDto;
+import gov.jets.iti.LinguaQuest.dto.auth.request.RegisterRequestDto;
+import gov.jets.iti.LinguaQuest.dto.auth.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.exception.auth.*;
 import gov.jets.iti.LinguaQuest.service.AuthService;
 import gov.jets.iti.LinguaQuest.service.LanguageService;

@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.RewardResult;
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.reward.RewardResult;
+import gov.jets.iti.LinguaQuest.dto.world.*;
 import gov.jets.iti.LinguaQuest.entity.*;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
@@ -13,6 +13,7 @@ import gov.jets.iti.LinguaQuest.util.RewardCalculatorUtil;
 import gov.jets.iti.LinguaQuest.util.UserProgressUpdaterUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
@@ -141,6 +143,7 @@ public class GameService {
         progress.setWord(newWord);
         user.setCoins(user.getCoins() - CHANGE_WORD_COIN_COST);
 
+        progress.setHintUsed(false);
         return new StartLevelResponse(newWord.getText(), user.getCoins());
     }
 
@@ -170,7 +173,10 @@ public class GameService {
                 .orElseThrow(() -> new UserLanguageNotFoundException(
                         "User " + userId + " has not added language " + word.getLanguage().getId()));
 
+
+        log.info("AI verifying image for word: {}", word.getText());
         boolean isMatch = aiService.verifyImage(image, word.getText());
+        log.info("AI verification result: {}", isMatch);
 
         if (!isMatch) {
             return new VerifyImageResponse(

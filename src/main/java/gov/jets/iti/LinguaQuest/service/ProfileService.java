@@ -1,14 +1,14 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.request.ChangePasswordRequest;
-import gov.jets.iti.LinguaQuest.dto.request.DeleteProfileRequest;
-import gov.jets.iti.LinguaQuest.dto.request.UpdateProfileRequest;
-import gov.jets.iti.LinguaQuest.dto.response.ImageUploadResponseDTO;
-import gov.jets.iti.LinguaQuest.dto.response.PhotoUploadResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileResponseDto.CurrentJourneyDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileResponseDto.ProfileStatsDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileUpdateResponseDto;
+import gov.jets.iti.LinguaQuest.dto.auth.request.ChangePasswordRequest;
+import gov.jets.iti.LinguaQuest.dto.profile.DeleteProfileRequest;
+import gov.jets.iti.LinguaQuest.dto.profile.UpdateProfileRequest;
+import gov.jets.iti.LinguaQuest.dto.common.ImageUploadResult;
+import gov.jets.iti.LinguaQuest.dto.common.PhotoUploadResponseDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileResponseDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileResponseDto.CurrentJourneyDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileResponseDto.ProfileStatsDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileUpdateResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.enums.SignInProvider;
@@ -140,7 +140,7 @@ public class ProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EmailNotFoundException("User not found"));
 
-        ImageUploadResponseDTO uploadResponse = imageService.uploadPhoto(file);
+        ImageUploadResult uploadResponse = imageService.uploadPhoto(file);
         
         if (user.getPhotoPublicId() != null) {
             try {

@@ -1,11 +1,13 @@
 package gov.jets.iti.LinguaQuest.service;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.language.*;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
+import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveActiveLanguageException;
+import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveLastLanguageException;
 import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyAddedException;
 import gov.jets.iti.LinguaQuest.exception.language.LanguageAlreadyNativeException;
@@ -84,6 +86,31 @@ public class LanguageService {
                 .toList();
 
         userLanguageRepository.saveAll(newRows);
+
+        return getMyLanguages(userId);
+    }
+
+    @Transactional
+    public MyLanguagesResponse removeLanguages(Long userId, List<Long> languageIds){
+        Set<Long> requestedIds = new LinkedHashSet<>(languageIds);
+        List<UserLanguage> userLanguages = userLanguageRepository
+                .findAllByUserIdAndLanguageIdsWithLanguage(userId, requestedIds);
+
+        if (userLanguages.size() != requestedIds.size()) {
+            throw new LanguageNotFoundException(
+                    "One or more selected languages are not in your profile");
+        }
+        boolean containsActiveLanguage = userLanguages.stream().anyMatch(UserLanguage::isActive);
+        if (containsActiveLanguage) {
+            throw new CannotRemoveActiveLanguageException(
+                    "Cannot remove your active language. Set another language as active first.");
+        }
+        long currentLanguagesCount = userLanguageRepository.countByUserId(userId);
+        if (currentLanguagesCount - requestedIds.size() < 1) {
+            throw new CannotRemoveLastLanguageException(
+                    "You must have at least one language in your profile.");
+        }
+            userLanguageRepository.deleteAll(userLanguages);
 
         return getMyLanguages(userId);
     }

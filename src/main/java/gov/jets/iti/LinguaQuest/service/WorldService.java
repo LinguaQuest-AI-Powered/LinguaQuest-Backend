@@ -1,16 +1,15 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.response.LevelDto;
-import gov.jets.iti.LinguaQuest.dto.response.WorldDto;
-import gov.jets.iti.LinguaQuest.dto.response.WorldLevelsResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.LevelDto;
+import gov.jets.iti.LinguaQuest.dto.world.WorldDto;
+import gov.jets.iti.LinguaQuest.dto.world.WorldLevelsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
-import gov.jets.iti.LinguaQuest.exception.language.InvalidLanguageIdException;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;

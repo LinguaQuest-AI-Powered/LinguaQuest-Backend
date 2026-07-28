@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller.auth;
 
-import gov.jets.iti.LinguaQuest.dto.request.FirebaseLoginRequest;
-import gov.jets.iti.LinguaQuest.dto.response.OAuthResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.auth.request.FirebaseLoginRequest;
+import gov.jets.iti.LinguaQuest.dto.auth.response.OAuthResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.OAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

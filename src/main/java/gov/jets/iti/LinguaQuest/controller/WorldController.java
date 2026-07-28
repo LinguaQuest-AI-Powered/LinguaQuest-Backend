@@ -1,13 +1,15 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorDetails;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.world.*;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.service.GameService;
 import gov.jets.iti.LinguaQuest.service.WorldService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/{version}/worlds")

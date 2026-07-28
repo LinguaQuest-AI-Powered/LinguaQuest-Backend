@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.request.AddLanguagesRequest;
-import gov.jets.iti.LinguaQuest.dto.request.SetActiveLanguageRequest;
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.language.*;
+import gov.jets.iti.LinguaQuest.dto.language.SetActiveLanguageRequest;
 import gov.jets.iti.LinguaQuest.service.LanguageService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.validation.Valid;
@@ -32,6 +32,12 @@ public class LanguageController {
     @PostMapping
     public ResponseEntity<SuccessResponse<MyLanguagesResponse>> addLanguages(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid AddLanguagesRequest request) {
         MyLanguagesResponse response = languageService.addLanguages(principle.user().getId(), request.languageIds());
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<SuccessResponse<MyLanguagesResponse>> removeLanguages(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid RemoveLanguagesRequest request) {
+        MyLanguagesResponse response = languageService.removeLanguages(principle.user().getId(), request.languageIds());
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
 

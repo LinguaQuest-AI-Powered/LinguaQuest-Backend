@@ -1,11 +1,11 @@
 package gov.jets.iti.LinguaQuest.controller.auth;
 
 
-import gov.jets.iti.LinguaQuest.dto.request.ForgetPasswordRequest;
-import gov.jets.iti.LinguaQuest.dto.request.OtpVerifyRequest;
-import gov.jets.iti.LinguaQuest.dto.response.ForgetPasswordResponse;
-import gov.jets.iti.LinguaQuest.dto.response.PasswordResetOtpVerifyResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.auth.request.ForgetPasswordRequest;
+import gov.jets.iti.LinguaQuest.dto.auth.request.OtpVerifyRequest;
+import gov.jets.iti.LinguaQuest.dto.auth.response.ForgetPasswordResponse;
+import gov.jets.iti.LinguaQuest.dto.auth.response.PasswordResetOtpVerifyResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

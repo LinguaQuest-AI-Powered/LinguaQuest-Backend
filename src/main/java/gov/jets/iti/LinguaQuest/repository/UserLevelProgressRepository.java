@@ -1,6 +1,6 @@
 package gov.jets.iti.LinguaQuest.repository;
 
-import gov.jets.iti.LinguaQuest.dto.SolvedWordDto;
+import gov.jets.iti.LinguaQuest.dto.world.SolvedWordDto;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

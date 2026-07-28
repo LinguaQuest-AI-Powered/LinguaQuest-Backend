@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.exception;
 
-import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
-import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorDetails;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
@@ -137,6 +137,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LanguageAlreadyNativeException.class)
     public ResponseEntity<ErrorResponse> handleLanguageNotFound(LanguageAlreadyNativeException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "SAME_NATIVE_LANGUAGE", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(CannotRemoveActiveLanguageException.class)
+    public ResponseEntity<ErrorResponse> handleCannotRemoveActiveLanguage(CannotRemoveActiveLanguageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CANNOT_REMOVE_ACTIVE_LANGUAGE", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(CannotRemoveLastLanguageException.class)
+    public ResponseEntity<ErrorResponse> handleCannotRemoveLastLanguage(CannotRemoveLastLanguageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CANNOT_REMOVE_LAST_LANGUAGE", ex.getMessage(), request);
     }
 
 

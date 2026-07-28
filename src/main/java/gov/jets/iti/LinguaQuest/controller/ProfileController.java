@@ -1,14 +1,14 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.request.ChangePasswordRequest;
-import gov.jets.iti.LinguaQuest.dto.request.CompleteProfileRequest;
-import gov.jets.iti.LinguaQuest.dto.request.DeleteProfileRequest;
-import gov.jets.iti.LinguaQuest.dto.request.UpdateProfileRequest;
-import gov.jets.iti.LinguaQuest.dto.response.OAuthResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.PhotoUploadResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.ProfileUpdateResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.auth.request.ChangePasswordRequest;
+import gov.jets.iti.LinguaQuest.dto.profile.CompleteProfileRequest;
+import gov.jets.iti.LinguaQuest.dto.profile.DeleteProfileRequest;
+import gov.jets.iti.LinguaQuest.dto.profile.UpdateProfileRequest;
+import gov.jets.iti.LinguaQuest.dto.auth.response.OAuthResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.PhotoUploadResponseDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileResponseDto;
+import gov.jets.iti.LinguaQuest.dto.profile.ProfileUpdateResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.OAuthService;
 import gov.jets.iti.LinguaQuest.service.ProfileService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;

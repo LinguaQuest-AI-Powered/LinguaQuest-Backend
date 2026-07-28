@@ -1,9 +1,8 @@
 package gov.jets.iti.LinguaQuest.util;
 
-import gov.jets.iti.LinguaQuest.dto.RewardResult;
+import gov.jets.iti.LinguaQuest.dto.reward.RewardResult;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 

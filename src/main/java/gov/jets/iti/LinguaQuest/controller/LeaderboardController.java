@@ -1,9 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.LeaderBoardResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
-import gov.jets.iti.LinguaQuest.enums.LeaderboardType;
+import gov.jets.iti.LinguaQuest.dto.leaderboard.LeaderBoardResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.LeaderBoardService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;

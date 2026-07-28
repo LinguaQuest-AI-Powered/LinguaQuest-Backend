@@ -1,9 +1,9 @@
 package gov.jets.iti.LinguaQuest.service;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.HomeResponse;
-import gov.jets.iti.LinguaQuest.dto.response.UserLanguageDto;
-import gov.jets.iti.LinguaQuest.dto.response.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.home.HomeResponse;
+import gov.jets.iti.LinguaQuest.dto.language.UserLanguageDto;
+import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;

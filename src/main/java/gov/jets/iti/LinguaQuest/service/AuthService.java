@@ -1,12 +1,9 @@
 package gov.jets.iti.LinguaQuest.service;
 
+import gov.jets.iti.LinguaQuest.dto.auth.request.*;
+import gov.jets.iti.LinguaQuest.dto.auth.response.*;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
-import gov.jets.iti.LinguaQuest.dto.response.*;
 import gov.jets.iti.LinguaQuest.enums.Role;
-import gov.jets.iti.LinguaQuest.dto.request.LoginRequestDto;
-import gov.jets.iti.LinguaQuest.dto.request.RegisterRequestDto;
-import gov.jets.iti.LinguaQuest.dto.request.*;
-import gov.jets.iti.LinguaQuest.dto.request.RefreshTokenRequestDto;
 import gov.jets.iti.LinguaQuest.enums.SignInProvider;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
