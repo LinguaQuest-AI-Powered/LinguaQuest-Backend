@@ -139,6 +139,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "SAME_NATIVE_LANGUAGE", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(CannotRemoveActiveLanguageException.class)
+    public ResponseEntity<ErrorResponse> handleCannotRemoveActiveLanguage(CannotRemoveActiveLanguageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CANNOT_REMOVE_ACTIVE_LANGUAGE", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(CannotRemoveLastLanguageException.class)
+    public ResponseEntity<ErrorResponse> handleCannotRemoveLastLanguage(CannotRemoveLastLanguageException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "CANNOT_REMOVE_LAST_LANGUAGE", ex.getMessage(), request);
+    }
+
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingRequestParameter(
