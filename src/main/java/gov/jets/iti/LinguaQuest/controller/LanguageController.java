@@ -35,6 +35,12 @@ public class LanguageController {
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
     }
 
+    @DeleteMapping
+    public ResponseEntity<SuccessResponse<MyLanguagesResponse>> removeLanguages(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid RemoveLanguagesRequest request) {
+        MyLanguagesResponse response = languageService.removeLanguages(principle.user().getId(), request.languageIds());
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
     @PatchMapping("/active")
     public ResponseEntity<SuccessResponse<ActiveLanguageResponse>> setActiveLanguage(@AuthenticationPrincipal UserPrinciple principle, @RequestBody @Valid SetActiveLanguageRequest request) {
         ActiveLanguageResponse response = languageService.setActiveLanguage(principle.user().getId(), request.languageId());

@@ -143,6 +143,7 @@ public class GameService {
         progress.setWord(newWord);
         user.setCoins(user.getCoins() - CHANGE_WORD_COIN_COST);
 
+        progress.setHintUsed(false);
         return new StartLevelResponse(newWord.getText(), user.getCoins());
     }
 
