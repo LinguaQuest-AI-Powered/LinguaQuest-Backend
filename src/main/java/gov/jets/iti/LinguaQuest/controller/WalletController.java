@@ -1,10 +1,10 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 
-import gov.jets.iti.LinguaQuest.dto.request.AdjustWalletRequestDto;
-import gov.jets.iti.LinguaQuest.dto.response.AdjustWalletResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
-import gov.jets.iti.LinguaQuest.dto.response.WalletResponseDto;
+import gov.jets.iti.LinguaQuest.dto.wallet.AdjustWalletRequestDto;
+import gov.jets.iti.LinguaQuest.dto.wallet.AdjustWalletResponseDto;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.wallet.WalletResponseDto;
 import gov.jets.iti.LinguaQuest.service.WalletService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.validation.Valid;

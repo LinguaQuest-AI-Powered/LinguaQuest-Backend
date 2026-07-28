@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.response.StartLevelResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.world.StartLevelResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.service.GameService;
@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class WorldControllerTest {
 
-    @Mock
-    private WorldService worldService;
 
     @Mock
     private GameService gameService;
@@ -33,12 +31,11 @@ class WorldControllerTest {
     @InjectMocks
     private WorldController worldController;
 
-    private User testUser;
     private UserPrinciple userPrinciple;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
+        User testUser = User.builder()
                 .id(1L)
                 .email("user@example.com")
                 .role(Role.ROLE_USER)

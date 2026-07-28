@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.response.DailyRewardClaimResponse;
-import gov.jets.iti.LinguaQuest.dto.response.DailyRewardStatusResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.reward.DailyRewardClaimResponse;
+import gov.jets.iti.LinguaQuest.dto.reward.DailyRewardStatusResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.DailyRewardService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;

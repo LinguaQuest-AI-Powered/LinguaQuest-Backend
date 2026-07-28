@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
 
-import gov.jets.iti.LinguaQuest.dto.response.HomeResponse;
-import gov.jets.iti.LinguaQuest.dto.response.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.home.HomeResponse;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.service.HomeService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;

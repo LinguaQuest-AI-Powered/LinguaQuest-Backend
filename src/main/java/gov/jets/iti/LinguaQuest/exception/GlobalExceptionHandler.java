@@ -1,7 +1,7 @@
 package gov.jets.iti.LinguaQuest.exception;
 
-import gov.jets.iti.LinguaQuest.dto.response.ErrorDetails;
-import gov.jets.iti.LinguaQuest.dto.response.ErrorResponse;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorDetails;
+import gov.jets.iti.LinguaQuest.dto.common.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;

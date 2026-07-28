@@ -1,9 +1,9 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.SolvedWordDto;
-import gov.jets.iti.LinguaQuest.dto.response.CustomWorldDto;
-import gov.jets.iti.LinguaQuest.dto.response.GalleryResponseDto;
-import gov.jets.iti.LinguaQuest.dto.response.WordDto;
+import gov.jets.iti.LinguaQuest.dto.world.SolvedWordDto;
+import gov.jets.iti.LinguaQuest.dto.world.CustomWorldDto;
+import gov.jets.iti.LinguaQuest.dto.gallery.GalleryResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.WordDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;

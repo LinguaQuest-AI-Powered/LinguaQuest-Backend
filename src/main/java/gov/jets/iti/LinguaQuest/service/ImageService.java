@@ -2,7 +2,7 @@ package gov.jets.iti.LinguaQuest.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import gov.jets.iti.LinguaQuest.dto.response.ImageUploadResponseDTO;
+import gov.jets.iti.LinguaQuest.dto.common.ImageUploadResult;
 import gov.jets.iti.LinguaQuest.exception.ImageUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class ImageService {
 
     private final Cloudinary cloudinary;
 
-    public ImageUploadResponseDTO uploadPhoto(MultipartFile file) {
+    public ImageUploadResult uploadPhoto(MultipartFile file) {
         validateImageFile(file);
 
         try {
@@ -31,7 +31,7 @@ public class ImageService {
 
             log.info("Successfully uploaded photo to Cloudinary. Public ID: {}", publicId);
 
-            return new ImageUploadResponseDTO(url, publicId);
+            return new ImageUploadResult(url, publicId);
 
         } catch (IOException e) {
             log.error("Error occurred while uploading photo to Cloudinary", e);

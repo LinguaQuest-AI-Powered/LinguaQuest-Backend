@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.controller;
 
-import gov.jets.iti.LinguaQuest.dto.request.AddLanguagesRequest;
-import gov.jets.iti.LinguaQuest.dto.request.SetActiveLanguageRequest;
-import gov.jets.iti.LinguaQuest.dto.response.*;
+import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
+import gov.jets.iti.LinguaQuest.dto.language.*;
+import gov.jets.iti.LinguaQuest.dto.language.SetActiveLanguageRequest;
 import gov.jets.iti.LinguaQuest.service.LanguageService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.validation.Valid;

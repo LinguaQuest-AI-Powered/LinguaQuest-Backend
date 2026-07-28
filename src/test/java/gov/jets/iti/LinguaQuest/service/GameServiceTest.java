@@ -1,8 +1,8 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.response.LevelDto;
-import gov.jets.iti.LinguaQuest.dto.response.StartLevelResponse;
-import gov.jets.iti.LinguaQuest.dto.response.WorldLevelsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.LevelDto;
+import gov.jets.iti.LinguaQuest.dto.world.StartLevelResponse;
+import gov.jets.iti.LinguaQuest.dto.world.WorldLevelsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
@@ -70,8 +70,6 @@ class GameServiceTest {
     @Mock
     private WorldService worldService;
 
-    @Mock
-    private AIService aiService;
 
     @InjectMocks
     private GameService gameService;

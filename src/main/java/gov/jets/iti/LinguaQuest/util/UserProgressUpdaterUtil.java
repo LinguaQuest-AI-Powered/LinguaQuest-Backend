@@ -1,6 +1,6 @@
 package gov.jets.iti.LinguaQuest.util;
 
-import gov.jets.iti.LinguaQuest.dto.RewardResult;
+import gov.jets.iti.LinguaQuest.dto.reward.RewardResult;
 import gov.jets.iti.LinguaQuest.entity.User;
 import org.springframework.stereotype.Component;
 
