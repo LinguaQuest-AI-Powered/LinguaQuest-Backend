@@ -33,6 +33,16 @@ public interface UserLanguageRepository extends JpaRepository<UserLanguage,Long>
     @Query("""
             SELECT ul FROM UserLanguage ul
             JOIN FETCH ul.language
+            WHERE ul.user.id = :userId AND ul.language.id IN :languageIds
+            """)
+    List<UserLanguage> findAllByUserIdAndLanguageIdsWithLanguage(
+            @Param("userId") Long userId, @Param("languageIds") Set<Long> languageIds);
+
+    long countByUserId(Long userId);
+
+    @Query("""
+            SELECT ul FROM UserLanguage ul
+            JOIN FETCH ul.language
             WHERE ul.user.id = :userId AND ul.language.id = :languageId
             """)
     Optional<UserLanguage> findByUserIdAndLanguageIdWithLanguage(
