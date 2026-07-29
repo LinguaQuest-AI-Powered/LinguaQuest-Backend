@@ -12,16 +12,25 @@ import org.springframework.ai.content.Media;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.model.ChatModel;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
 @Service
 public class AIService {
 
-    private final ChatClient chatClient;
+    private static final Logger log = LoggerFactory.getLogger(AIService.class);
 
-    public AIService(ChatClient.Builder chatClientBuilder) {
+    private final ChatClient chatClient;
+    private final ChatModel chatModel;
+
+    public AIService(ChatClient.Builder chatClientBuilder, ChatModel chatModel) {
+        this.chatModel = chatModel;
         this.chatClient = chatClientBuilder.build();
+        log.info("--> [AIService Initialized] Active Provider Bean: {}", chatModel.getClass().getSimpleName());
     }
 
     public boolean verifyImage(MultipartFile image, String targetWord) {
@@ -42,6 +51,7 @@ public class AIService {
                 .build();
 
         ChatResponse response = chatClient.prompt(new Prompt(userMessage)).call().chatResponse();
+        logAiExecution("verifyImage", response);
 
         String result = response.getResult().getOutput().getText().trim().toLowerCase();
         return result.startsWith("true");
@@ -63,7 +73,16 @@ public class AIService {
             """.formatted(nativeLanguageName, wordText, nativeLanguageName);
 
         ChatResponse response = chatClient.prompt(new Prompt(new UserMessage(promptText))).call().chatResponse();
+        logAiExecution("generateHint", response);
         return response.getResult().getOutput().getText().trim();
+    }
+
+    private void logAiExecution(String action, ChatResponse response) {
+        String providerBean = chatModel.getClass().getSimpleName();
+        String modelId = (response != null && response.getMetadata() != null && response.getMetadata().getModel() != null)
+                ? response.getMetadata().getModel()
+                : "unknown-model";
+        log.info("<-- [AIService Execution] Action: {} | Provider Bean: {} | Model Used: {}", action, providerBean, modelId);
     }
 
     private Resource toResource(MultipartFile image) {
