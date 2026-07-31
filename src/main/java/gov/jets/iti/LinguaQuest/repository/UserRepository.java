@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -42,5 +43,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
          OR (u.xp = :xp AND u.id < :userId)
       )
     """)
-    Integer findRank(Long userId, Integer xp);
+    Integer findRank(@Param("userId") Long userId, @Param("xp") Integer xp);
+
+    @Query(value = """
+        SELECT *
+        FROM users u
+        WHERE u.is_deleted = false
+        ORDER BY u.xp DESC, u.id ASC
+        LIMIT :limit OFFSET :offset
+        """, nativeQuery = true)
+    List<User> findSurroundingUsers(@Param("offset") int offset, @Param("limit") int limit);
 }
