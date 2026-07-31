@@ -1,13 +1,10 @@
 package gov.jets.iti.LinguaQuest.entity;
 
+import gov.jets.iti.LinguaQuest.enums.AchievementTrigger;
+import gov.jets.iti.LinguaQuest.enums.CriteriaType;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * NEW ENTITY. Catalog data - "Trophies" - seeded by admins. AchievementSummary
- * exposes status/progressPercent, which are per-user and live on
- * UserAchievement instead.
- */
 @Entity
 @Table(name = "achievements")
 @Getter
@@ -30,9 +27,23 @@ public class Achievement {
     @Column(name = "icon_url", length = 500)
     private String iconUrl;
 
-    @Column(name = "criteria_type", length = 50)
-    private String criteriaType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "criteria_type", nullable = false, length = 50)
+    private CriteriaType criteriaType;
 
-    @Column(name = "target_value")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trigger_event", nullable = false, length = 50)
+    private AchievementTrigger triggerEvent;
+
+    @Column(name = "target_value", nullable = false)
     private Integer targetValue;
+
+    @Column(name = "target_world_id")
+    private Long targetWorldId;
+
+    @Column(name = "xp_reward")
+    private Integer xpReward;
+
+    @Column(name = "coin_reward")
+    private Integer coinReward;
 }

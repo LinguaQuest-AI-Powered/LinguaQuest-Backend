@@ -42,6 +42,9 @@ public class UserAchievement {
     @Column(name = "xp_awarded")
     private Integer xpAwarded;
 
+    @Column(name = "coin_awarded")
+    private Integer coinAwarded;
+
     @Column(name = "earned_at")
     private LocalDateTime earnedAt;
 }

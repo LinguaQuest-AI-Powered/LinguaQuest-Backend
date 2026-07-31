@@ -5,6 +5,7 @@ import gov.jets.iti.LinguaQuest.dto.language.*;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
+import gov.jets.iti.LinguaQuest.enums.AchievementTrigger;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveLastLanguageException;
@@ -15,6 +16,7 @@ import gov.jets.iti.LinguaQuest.exception.language.LanguageNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
+import gov.jets.iti.LinguaQuest.service.achievement.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class LanguageService {
     private final LanguageRepository languageRepository;
     private final UserLanguageRepository userLanguageRepository;
     private final UserRepository userRepository;
+    private final AchievementService achievementService;
 
     public AvailableLanguagesResponse getAvailableLanguages(Long userId) {
         List<Language> languagesList = languageRepository.findAllByOrderByNameAsc();
@@ -86,7 +89,7 @@ public class LanguageService {
                 .toList();
 
         userLanguageRepository.saveAll(newRows);
-
+        achievementService.onEvent(userRef, AchievementTrigger.LANGUAGE_ADDED);
         return getMyLanguages(userId);
     }
 
