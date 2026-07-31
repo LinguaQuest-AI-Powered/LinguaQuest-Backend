@@ -30,6 +30,21 @@ public class LeaderBoardService {
         Integer myRank = userRepository.findRank(userPrinciple.user().getId(), userPrinciple.user().getXp());
         return new LeaderBoardResponseDto(myRank,topThreeUserRankDtos,userRankDtos);
     }
+
+    public List<UserRankDto> getSurroundingLeaderboard(Long userId, Integer userXp, int range) {
+        int safeXp = userXp != null ? userXp : 0;
+        Integer myRank = userRepository.findRank(userId, safeXp);
+        if (myRank == null) {
+            myRank = 1;
+        }
+
+        int startRank = Math.max(1, myRank - range);
+        int offset = startRank - 1;
+        int limit = (myRank + range) - startRank + 1;
+
+        List<User> users = userRepository.findSurroundingUsers(offset, limit);
+        return toUserRankDtoList(users, startRank, userId);
+    }
     private List<UserRankDto> toUserRankDtoList(List<User> users, Integer startRank, Long currentUserId) {
         List<UserRankDto> userRankDtoList = new ArrayList<>();
         for(Integer counter =0 ; counter < users.size() ; counter++) {

@@ -25,6 +25,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import gov.jets.iti.LinguaQuest.dto.achievement.AchievementDto;
+import gov.jets.iti.LinguaQuest.dto.leaderboard.UserRankDto;
+import gov.jets.iti.LinguaQuest.enums.AchievementStatus;
+import gov.jets.iti.LinguaQuest.service.achievement.AchievementQueryService;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +46,8 @@ public class ProfileService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
+    private final AchievementQueryService achievementQueryService;
+    private final LeaderBoardService leaderBoardService;
 
     @Transactional(readOnly = true)
     public ProfileResponseDto getProfile(Long userId) {
@@ -67,6 +75,18 @@ public class ProfileService {
                 ul.getNextMilestoneXp()
         )).orElse(null);
 
+        List<AchievementDto> allAchievements = achievementQueryService.getAchievements(userId, "ALL").achievements();
+        List<AchievementDto> profileAchievements = allAchievements != null ? allAchievements.stream()
+                .sorted(Comparator
+                        .comparing((AchievementDto a) -> a.status() == AchievementStatus.EARNED ? 0 : 1)
+                        .thenComparing(AchievementDto::earnedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(AchievementDto::progressPercent, Comparator.reverseOrder())
+                )
+                .limit(3)
+                .toList() : List.of();
+
+        List<UserRankDto> leaderboardSnippet = leaderBoardService.getSurroundingLeaderboard(userId, user.getXp(), 1);
+
         return new ProfileResponseDto(
                 user.getId(),
                 user.getEmail(),
@@ -75,7 +95,9 @@ public class ProfileService {
                 user.getPhoto(),
                 user.getLevel(),
                 stats,
-                currentJourney
+                currentJourney,
+                profileAchievements,
+                leaderboardSnippet
         );
     }
 

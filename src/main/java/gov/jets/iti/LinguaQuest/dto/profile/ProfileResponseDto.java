@@ -1,5 +1,10 @@
 package gov.jets.iti.LinguaQuest.dto.profile;
 
+import gov.jets.iti.LinguaQuest.dto.achievement.AchievementDto;
+import gov.jets.iti.LinguaQuest.dto.leaderboard.UserRankDto;
+
+import java.util.List;
+
 public record ProfileResponseDto(
         Long id,
         String email,
@@ -8,7 +13,9 @@ public record ProfileResponseDto(
         String photoUrl,
         Integer level,
         ProfileStatsDto stats,
-        CurrentJourneyDto currentLanguageJourney
+        CurrentJourneyDto currentLanguageJourney,
+        List<AchievementDto> achievements,
+        List<UserRankDto> leaderboard
 ) {
     public record ProfileStatsDto(
             Integer coins,
