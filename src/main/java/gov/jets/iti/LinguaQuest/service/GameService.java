@@ -3,12 +3,14 @@ package gov.jets.iti.LinguaQuest.service;
 import gov.jets.iti.LinguaQuest.dto.reward.RewardResult;
 import gov.jets.iti.LinguaQuest.dto.world.*;
 import gov.jets.iti.LinguaQuest.entity.*;
+import gov.jets.iti.LinguaQuest.enums.AchievementTrigger;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import gov.jets.iti.LinguaQuest.exception.language.NativeLanguageNotSetException;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.*;
 import gov.jets.iti.LinguaQuest.repository.*;
+import gov.jets.iti.LinguaQuest.service.achievement.AchievementService;
 import gov.jets.iti.LinguaQuest.util.RewardCalculatorUtil;
 import gov.jets.iti.LinguaQuest.util.UserProgressUpdaterUtil;
 import jakarta.transaction.Transactional;
@@ -41,6 +43,7 @@ public class GameService {
     private final RewardCalculatorUtil rewardCalculator;
     private final UserProgressUpdaterUtil userProgressUpdaterUtil;
     private final WordHintRepository wordHintRepository;
+    private final AchievementService achievementService;
 
     @Transactional
     public StartLevelResponse startLevel(Long userId, Long worldId, Long levelId) {
@@ -202,6 +205,8 @@ public class GameService {
         applyLanguageProgress(userLanguage, reward);
         userProgressUpdaterUtil.applyReward(user, reward);
         userProgressUpdaterUtil.updateDailyStreak(user);
+
+        achievementService.onEvent(user, AchievementTrigger.LEVEL_VERIFIED);
 
         return new VerifyImageResponse(
                 true,
