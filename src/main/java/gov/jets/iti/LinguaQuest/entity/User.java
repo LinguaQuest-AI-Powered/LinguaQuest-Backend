@@ -45,7 +45,7 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
-    private Integer coins = 0;
+    private Integer coins = 100;
 
 
     @Column(nullable = false)
@@ -92,9 +92,6 @@ public class User {
 
     @Column(name = "last_daily_reward_claimed_at")
     private LocalDate lastDailyRewardClaimedAt;
-
-    @Column(name = "last_weekly_reward_claimed_at")
-    private LocalDate lastWeeklyRewardClaimedAt;
 
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
