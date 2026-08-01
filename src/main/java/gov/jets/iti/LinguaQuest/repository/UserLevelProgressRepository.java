@@ -96,4 +96,20 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
             @Param("languageId") Long languageId,
             @Param("nativeLanguageId") Long nativeLanguageId
     );
+
+    @Query(value = """
+    SELECT MAX(cnt) FROM (
+        SELECT COUNT(*) AS cnt
+        FROM user_level_progress ulp
+        JOIN words w        ON w.id = ulp.word_id
+        JOIN world_levels wl ON wl.id = ulp.level_id
+        WHERE ulp.user_id = :userId
+          AND wl.world_id = :worldId
+          AND ulp.status = 'COMPLETED'
+        GROUP BY w.language_id
+    ) AS per_language_counts
+    """, nativeQuery = true)
+    Integer findMaxCompletedLevelsInWorldAcrossLanguages(
+            @Param("userId") Long userId,
+            @Param("worldId") Long worldId);
 }
