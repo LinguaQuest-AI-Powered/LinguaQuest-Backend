@@ -79,15 +79,26 @@ public class GameService {
             throw new LevelLockedException("This level is locked. Complete previous levels first.");
         }
 
-        // Assign a random unused word
+        // Assign a random unused word based on progressive difficulty
         long unusedCount = wordRepository.countUnusedWords(userId, worldId, languageId);
         if (unusedCount == 0) {
             throw new WorldCompletedException("You have learned all words in this world!");
         }
 
-        int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
-        Page<Word> page = wordRepository.findUnusedWords(userId, worldId, languageId, PageRequest.of(randomOffset, 1));
-        Word word = page.getContent().getFirst();
+        int totalLevels = worldLevelsDto.levels().size();
+        Difficulty targetDifficulty = deriveDifficulty(worldLevel.getOrderIndex(), totalLevels);
+
+        long difficultyUnusedCount = wordRepository.countUnusedWordsByDifficulty(userId, worldId, languageId, targetDifficulty);
+        Word word;
+        if (difficultyUnusedCount > 0) {
+            int randomOffset = ThreadLocalRandom.current().nextInt((int) difficultyUnusedCount);
+            Page<Word> page = wordRepository.findUnusedWordsByDifficulty(userId, worldId, languageId, targetDifficulty, PageRequest.of(randomOffset, 1));
+            word = page.getContent().getFirst();
+        } else {
+            int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
+            Page<Word> page = wordRepository.findUnusedWords(userId, worldId, languageId, PageRequest.of(randomOffset, 1));
+            word = page.getContent().getFirst();
+        }
 
         UserLevelProgress progress = UserLevelProgress.builder()
                 .user(activeUserLanguage.getUser())
@@ -138,10 +149,24 @@ public class GameService {
             throw new NoMoreWordsException("There are no other new words available in this world.");
         }
 
-        int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
-        Page<Word> page = wordRepository.findUnusedWordsExcludingCurrent(
-                userId, worldId, languageId, currentWordId, PageRequest.of(randomOffset, 1));
-        Word newWord = page.getContent().getFirst();
+        long totalLevels = worldLevelRepository.countWorldLevelByWorld(progress.getWorldLevel().getWorld());
+        Difficulty targetDifficulty = deriveDifficulty(progress.getWorldLevel().getOrderIndex(), (int) totalLevels);
+
+        long difficultyUnusedCount = wordRepository.countUnusedWordsExcludingCurrentByDifficulty(
+                userId, worldId, languageId, targetDifficulty, currentWordId);
+
+        Word newWord;
+        if (difficultyUnusedCount > 0) {
+            int randomOffset = ThreadLocalRandom.current().nextInt((int) difficultyUnusedCount);
+            Page<Word> page = wordRepository.findUnusedWordsExcludingCurrentByDifficulty(
+                    userId, worldId, languageId, targetDifficulty, currentWordId, PageRequest.of(randomOffset, 1));
+            newWord = page.getContent().getFirst();
+        } else {
+            int randomOffset = ThreadLocalRandom.current().nextInt((int) unusedCount);
+            Page<Word> page = wordRepository.findUnusedWordsExcludingCurrent(
+                    userId, worldId, languageId, currentWordId, PageRequest.of(randomOffset, 1));
+            newWord = page.getContent().getFirst();
+        }
 
         progress.setWord(newWord);
         user.setCoins(user.getCoins() - CHANGE_WORD_COIN_COST);
@@ -282,5 +307,19 @@ public class GameService {
         userLanguage.setCurrentXp(newXp);
         userLanguage.setProgressPercent(
                 (int) Math.round((newXp * 100.0) / userLanguage.getNextMilestoneXp()));
+    }
+
+    private Difficulty deriveDifficulty(int orderIndex, int totalLevels) {
+        if (totalLevels <= 0) {
+            return Difficulty.EASY;
+        }
+        double oneThird = totalLevels / 3.0;
+        if (orderIndex <= Math.ceil(oneThird)) {
+            return Difficulty.EASY;
+        } else if (orderIndex <= Math.ceil(2.0 * oneThird)) {
+            return Difficulty.MEDIUM;
+        } else {
+            return Difficulty.HARD;
+        }
     }
 }
