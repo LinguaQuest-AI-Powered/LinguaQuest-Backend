@@ -12,8 +12,6 @@ services:
       - .env
     networks:
       - iti
-    ports:
-      - "8088:8080"
     volumes:
       - ./logs:/app/logs
     mem_limit: 2g
@@ -24,6 +22,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.team8-backend.rule=PathPrefix(`/team8`)"
+      - "traefik.http.services.team8-backend.loadbalancer.server.port=8080"
       - "traefik.docker.network=iti"
     restart: unless-stopped
 
