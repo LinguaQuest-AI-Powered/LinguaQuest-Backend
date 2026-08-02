@@ -19,5 +19,5 @@ jobs:
           script: |
             cd /teams/team8/LinguaQuest-Backend || cd ~/teams/team8/LinguaQuest-Backend || cd ~/team8/LinguaQuest-Backend
             git pull origin main
-            docker compose up -d --build
+            docker compose up -d --build --remove-orphans
             docker image prune -f

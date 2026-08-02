@@ -4,7 +4,7 @@ networks:
 
 services:
   linguaquest-backend:
-    container_name: linguaquest-backend
+    container_name: team8-linguaquest-backend
     build:
       context: .
       dockerfile: Dockerfile
