@@ -14,6 +14,8 @@ services:
       - iti
     ports:
       - "8088:8080"
+    volumes:
+      - ./logs:/app/logs
     mem_limit: 1g
     mem_reservation: 512m
     environment:
@@ -24,3 +26,17 @@ services:
       - "traefik.http.routers.team8-backend.rule=PathPrefix(`/team8`)"
       - "traefik.docker.network=iti"
     restart: unless-stopped
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle-team8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - iti
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.team8-dozzle.rule=PathPrefix(`/team8-logs`)"
+      - "traefik.docker.network=iti"
+    restart: unless-stopped
+
