@@ -11,7 +11,8 @@ public class PathsConfig {
     @Bean("publicPaths")
     List<String> publicPaths() {
         return List.of(
-                "/api/v1/auth/**"
+                "/api/v1/auth/**",
+                "/actuator/**"
         );
     }
 
