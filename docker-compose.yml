@@ -1,0 +1,26 @@
+networks:
+  iti:
+    external: true
+
+services:
+  linguaquest-backend:
+    container_name: linguaquest-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    networks:
+      - iti
+    ports:
+      - "8088:8080"
+    mem_limit: 1g
+    mem_reservation: 512m
+    environment:
+      SERVER_SERVLET_CONTEXT_PATH: /team8
+      JAVA_OPTS: "-XX:+UseG1GC -Xms256m -Xmx512m -XX:+UseContainerSupport"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.team8-backend.rule=PathPrefix(`/team8`)"
+      - "traefik.docker.network=iti"
+    restart: unless-stopped
