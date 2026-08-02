@@ -30,6 +30,8 @@ services:
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle-team8
+    environment:
+      DOZZLE_BASE_PATH: /team8-logs
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -37,6 +39,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.team8-dozzle.rule=PathPrefix(`/team8-logs`)"
+      - "traefik.http.services.team8-dozzle.loadbalancer.server.port=8080"
       - "traefik.docker.network=iti"
     restart: unless-stopped
 
