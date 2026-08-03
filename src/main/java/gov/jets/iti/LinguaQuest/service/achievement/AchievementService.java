@@ -7,8 +7,10 @@ import gov.jets.iti.LinguaQuest.entity.UserAchievement;
 import gov.jets.iti.LinguaQuest.enums.AchievementStatus;
 import gov.jets.iti.LinguaQuest.enums.AchievementTrigger;
 import gov.jets.iti.LinguaQuest.enums.CriteriaType;
+import gov.jets.iti.LinguaQuest.enums.NotificationType;
 import gov.jets.iti.LinguaQuest.repository.AchievementRepository;
 import gov.jets.iti.LinguaQuest.repository.UserAchievementRepository;
+import gov.jets.iti.LinguaQuest.service.notification.NotificationService;
 import gov.jets.iti.LinguaQuest.util.UserProgressUpdaterUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +27,17 @@ public class AchievementService {
     private final UserAchievementRepository userAchievementRepository;
     private final UserProgressUpdaterUtil userProgressUpdaterUtil;
     private final Map<CriteriaType, AchievementResolver> resolvers;
+    private final NotificationService notificationService;
 
     public AchievementService(AchievementRepository achievementRepository,
                               UserAchievementRepository userAchievementRepository,
                               UserProgressUpdaterUtil userProgressUpdaterUtil,
-                              List<AchievementResolver> resolverBeans) {
+                              List<AchievementResolver> resolverBeans,
+                              NotificationService notificationService) {
         this.achievementRepository = achievementRepository;
         this.userAchievementRepository = userAchievementRepository;
         this.userProgressUpdaterUtil = userProgressUpdaterUtil;
+        this.notificationService = notificationService;
         this.resolvers = resolverBeans.stream()
                 .collect(Collectors.toMap(AchievementResolver::supports, r -> r));
     }
@@ -68,6 +73,12 @@ public class AchievementService {
                 ua.setCoinAwarded(coins);
 
                 userProgressUpdaterUtil.applyReward(user, new RewardResult(xp, coins));
+                notificationService.send(
+                        user,
+                        NotificationType.ACHIEVEMENT_EARNED,
+                        "Trophy earned: " + achievement.getName(),
+                        achievement.getDescription()
+                );
             }
 
             userAchievementRepository.save(ua);
