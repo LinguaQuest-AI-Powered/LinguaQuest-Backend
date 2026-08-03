@@ -4,7 +4,6 @@ import gov.jets.iti.LinguaQuest.dto.common.SuccessResponse;
 import gov.jets.iti.LinguaQuest.dto.notification.request.RegisterDeviceRequest;
 import gov.jets.iti.LinguaQuest.dto.notification.request.UnregisterDeviceRequest;
 import gov.jets.iti.LinguaQuest.dto.notification.response.RegisterDeviceResponse;
-import gov.jets.iti.LinguaQuest.repository.DeviceTokenRepository;
 import gov.jets.iti.LinguaQuest.service.notification.DeviceTokenService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;
