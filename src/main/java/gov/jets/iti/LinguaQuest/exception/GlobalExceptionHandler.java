@@ -261,6 +261,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNativeLanguageNotSet(NativeLanguageNotSetException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, "NATIVE_LANGUAGE_NOT_SET", ex.getMessage(), request);
     }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "NOTIFICATION_NOT_FOUND", ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
