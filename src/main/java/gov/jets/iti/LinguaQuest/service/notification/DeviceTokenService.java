@@ -8,6 +8,7 @@ import gov.jets.iti.LinguaQuest.enums.DevicePlatform;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.DeviceTokenRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class DeviceTokenService {
     private final DeviceTokenRepository deviceTokenRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public RegisterDeviceResponse registerDevice(Long userId, String token, DevicePlatform platform){
 
         User user = userRepository.findByIdWithNativeLanguage(userId)
@@ -37,6 +39,7 @@ public class DeviceTokenService {
         return new RegisterDeviceResponse("success");
     }
 
+    @Transactional
     public RegisterDeviceResponse unregisterDevice(String token){
         deviceTokenRepository.deleteByToken(token);
         return new RegisterDeviceResponse("success");
