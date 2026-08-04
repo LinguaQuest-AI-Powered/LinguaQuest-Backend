@@ -5,6 +5,7 @@ import gov.jets.iti.LinguaQuest.dto.notification.response.DeleteNotificationResp
 import gov.jets.iti.LinguaQuest.dto.notification.response.MarkReadResponse;
 import gov.jets.iti.LinguaQuest.dto.notification.response.NotificationsListDto;
 import gov.jets.iti.LinguaQuest.dto.notification.response.UnreadCountResponse;
+import gov.jets.iti.LinguaQuest.enums.NotificationType;
 import gov.jets.iti.LinguaQuest.service.notification.NotificationService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;
@@ -60,5 +61,23 @@ public class NotificationController {
     public ResponseEntity<SuccessResponse<DeleteNotificationResponse>> deleteAllNotifications(@AuthenticationPrincipal UserPrinciple principal) {
         DeleteNotificationResponse response = notificationService.deleteAll(principal.user().getId());
         return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
+    @PostMapping
+    public ResponseEntity<SuccessResponse<String>> sendTestNotification(
+            @AuthenticationPrincipal UserPrinciple principal,
+            @RequestParam(defaultValue = "SYSTEM") String type,
+            @RequestParam(defaultValue = "Test Notification") String title,
+            @RequestParam(defaultValue = "This is a test notification from LinguaQuest.") String body) {
+
+        NotificationType notificationType;
+        try {
+            notificationType = NotificationType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid notification type: " + type);
+        }
+
+        notificationService.send(principal.user(), notificationType, title, body);
+        return ResponseEntity.ok(new SuccessResponse<>(true, "Test notification sent to user " + principal.user().getId()));
     }
 }
