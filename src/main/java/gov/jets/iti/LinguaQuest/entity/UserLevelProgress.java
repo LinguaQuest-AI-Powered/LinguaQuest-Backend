@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.entity;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -44,4 +45,9 @@ public class UserLevelProgress {
     @Column(name = "hint_used", nullable = false)
     @Builder.Default
     private boolean hintUsed = false;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false,
+            columnDefinition = "datetime(6) NOT NULL DEFAULT (UTC_TIMESTAMP(6))")
+    private LocalDateTime updatedAt;
 }
