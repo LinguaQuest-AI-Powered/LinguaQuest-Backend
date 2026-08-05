@@ -1,9 +1,6 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.world.LevelDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldLevelsResponseDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.*;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
@@ -19,10 +16,7 @@ import gov.jets.iti.LinguaQuest.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -167,6 +161,36 @@ public class WorldService {
                 .toList();
 
         return new WorldsResponseDto(topWorlds.size(), topWorlds);
+    }
+
+    public Optional<ContinueLevelDto> getContinueTarget(Long userId) {
+        UserLanguage activeUserLanguage = getActiveUserLanguage(userId);
+        Long languageId = activeUserLanguage.getLanguage().getId();
+
+        List<Long> worldIds = userLevelProgressRepository
+                .findWorldIdsOrderedByRecentActivity(userId, languageId);
+
+        for (Long worldId : worldIds) {
+            WorldLevelsResponseDto worldLevels = getWorldLevels(userId, worldId);
+
+            Optional<LevelDto> target = worldLevels.levels().stream()
+                    .filter(l -> l.getStatus() == LevelStatus.INPROGRESS
+                            || l.getStatus() == LevelStatus.AVAILABLE)
+                    .findFirst();
+
+            if (target.isPresent()) {
+                LevelDto level = target.get();
+                return Optional.of(new ContinueLevelDto(
+                        worldId,
+                        worldLevels.name(),
+                        level.getId(),
+                        level.getOrder(),
+                        level.getWord()
+                ));
+            }
+        }
+
+        return Optional.empty();
     }
 
     private WorldDto mapWorldToWorldDto(World world,long worldLevelCount, long worldCompletedLevels, long progressPercent) {
