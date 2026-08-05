@@ -146,11 +146,18 @@ public class WorldService {
 
     public WorldsResponseDto getExploreWorldsPreview(Long userId, Long languageId, int limit) {
         List<World> allWorlds = worldRepository.findAll();
-        List<WorldDto> worldDtos = new ArrayList<>();
 
+        Map<Long, Long> totalLevelsByWorld = worldLevelRepository.countLevelsGroupedByWorld().stream()
+                .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
+
+        Map<Long, Long> completedLevelsByWorld = userLevelProgressRepository
+                .countCompletedLevelsGroupedByWorld(userId, languageId).stream()
+                .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
+
+        List<WorldDto> worldDtos = new ArrayList<>();
         for (World world : allWorlds) {
-            long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
-            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId, world.getId(), languageId);
+            long worldLevelCount = totalLevelsByWorld.getOrDefault(world.getId(), 0L);
+            long worldCompletedLevels = completedLevelsByWorld.getOrDefault(world.getId(), 0L);
             long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
             worldDtos.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
         }
