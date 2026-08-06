@@ -3,6 +3,7 @@ package gov.jets.iti.LinguaQuest.service;
 
 import gov.jets.iti.LinguaQuest.dto.home.HomeResponse;
 import gov.jets.iti.LinguaQuest.dto.language.UserLanguageDto;
+import gov.jets.iti.LinguaQuest.dto.world.ContinueLevelDto;
 import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
@@ -30,6 +31,7 @@ public class HomeService {
 
         UserLanguageDto activeLanguage = null;
         WorldsResponseDto exploreWorlds = new WorldsResponseDto(0, List.of());
+        ContinueLevelDto continueLevel = null;
 
         if (userLanguageOpt.isPresent()) {
             UserLanguage userLanguage = userLanguageOpt.get();
@@ -44,7 +46,7 @@ public class HomeService {
                     userLanguage.isActive(),
                     userLanguage.getProgressPercent()
             );
-
+            continueLevel = worldService.getContinueTarget(userId).orElse(null);
         }
 
         return new HomeResponse(
@@ -52,7 +54,8 @@ public class HomeService {
                 user.getCoins(),
                 user.getCurrentStreakDays(),
                 activeLanguage,
-                exploreWorlds
+                exploreWorlds,
+                continueLevel
         );
     }
 

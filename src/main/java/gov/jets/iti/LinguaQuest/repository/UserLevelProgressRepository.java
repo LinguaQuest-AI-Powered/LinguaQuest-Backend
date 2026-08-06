@@ -1,6 +1,7 @@
 package gov.jets.iti.LinguaQuest.repository;
 
 import gov.jets.iti.LinguaQuest.dto.world.SolvedWordDto;
+import gov.jets.iti.LinguaQuest.dto.world.WorldLevelCountView;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,9 +27,10 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
     @Query("""
     SELECT ulp
     FROM UserLevelProgress ulp
+    JOIN FETCH ulp.word w
     WHERE ulp.user.id = :userId
       AND ulp.worldLevel.world.id = :worldId
-      AND ulp.word.language.id = :languageId
+      AND w.language.id = :languageId
     ORDER BY ulp.worldLevel.orderIndex
     """)
     List<UserLevelProgress> findUserProgressLevels(
@@ -112,4 +114,28 @@ public interface UserLevelProgressRepository extends JpaRepository<UserLevelProg
     Integer findMaxCompletedLevelsInWorldAcrossLanguages(
             @Param("userId") Long userId,
             @Param("worldId") Long worldId);
+
+    @Query("""
+    SELECT ulp.worldLevel.world.id
+    FROM UserLevelProgress ulp
+    WHERE ulp.user.id = :userId
+      AND ulp.word.language.id = :languageId
+    GROUP BY ulp.worldLevel.world.id
+    ORDER BY MAX(ulp.updatedAt) DESC
+    """)
+    List<Long> findWorldIdsOrderedByRecentActivity(
+            @Param("userId") Long userId,
+            @Param("languageId") Long languageId);
+
+    @Query("""
+    SELECT ulp.worldLevel.world.id AS worldId, COUNT(ulp) AS cnt
+    FROM UserLevelProgress ulp
+    WHERE ulp.user.id = :userId
+      AND ulp.word.language.id = :languageId
+      AND ulp.status = LevelStatus.COMPLETED
+    GROUP BY ulp.worldLevel.world.id
+    """)
+    List<WorldLevelCountView> countCompletedLevelsGroupedByWorld(
+            @Param("userId") Long userId,
+            @Param("languageId") Long languageId);
 }

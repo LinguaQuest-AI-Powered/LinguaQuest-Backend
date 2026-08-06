@@ -105,6 +105,13 @@ public class WorldController {
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "difficulty must have a value of this set (EASY - MEDIUM - HARD - ALL)", request);
     }
 
+    @GetMapping("/continue-level")
+    public ResponseEntity<SuccessResponse<ContinueLevelDto>> getContinueLevel(@AuthenticationPrincipal UserPrinciple principle) {
+        ContinueLevelDto response = worldService.getContinueTarget(principle.user().getId())
+                .orElse(null);
+        return ResponseEntity.ok(new SuccessResponse<>(true, response));
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
