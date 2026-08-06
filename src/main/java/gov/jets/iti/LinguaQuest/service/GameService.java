@@ -182,7 +182,7 @@ public class GameService {
         }
 
         UserLanguage userActiveLanguage = userLanguageRepository
-                .findActiveByUserIdWithLanguage(userId) // or however you fetch the active one
+                .findActiveByUserIdWithLanguage(userId)
                 .orElseThrow(() -> new UserLanguageNotFoundException(
                         "User " + userId + " has no active language"));
 
