@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.repository;
 
+import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.Word;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import org.springframework.data.domain.Page;
@@ -7,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface WordRepository extends JpaRepository<Word, Long> {
 
@@ -157,4 +160,16 @@ public interface WordRepository extends JpaRepository<Word, Long> {
                                                            @Param("difficulty") Difficulty difficulty,
                                                            @Param("currentWordId") Long currentWordId,
                                                            Pageable pageable);
+
+    @Query(value = """
+    SELECT * FROM words w
+    WHERE w.language_id = :languageId
+    ORDER BY RAND()
+    LIMIT 1
+    """, nativeQuery = true)
+    Optional<Word> findRandomWordByLanguage(@Param("languageId") Long languageId);
+
+    Optional<Word> findWordByWordCodeAndLanguage(String wordCode, Language targetLanguage);
+
+    Optional<Word> findWordByText(String text);
 }

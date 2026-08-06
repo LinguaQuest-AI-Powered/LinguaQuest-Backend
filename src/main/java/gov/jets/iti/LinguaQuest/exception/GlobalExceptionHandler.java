@@ -332,6 +332,28 @@ public class GlobalExceptionHandler {
                 .orElse("Validation failed");
         return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, request);
     }
+
+    @ExceptionHandler(WordNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWordNotFoundException(
+            WordNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "WORD_NOT_FOUND",
+                ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(DailyMissionWordNotFound.class)
+    public ResponseEntity<ErrorResponse> handleDailyMissionWordNotFound(
+            DailyMissionWordNotFound ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "DAILY_MISSION_NOT_FOUND",
+                ex.getMessage(), request);
+    }
+
+
+    @ExceptionHandler(DailyMissionSolvedException.class)
+    public ResponseEntity<ErrorResponse> handleDailyMissionSolvedException(
+            DailyMissionSolvedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "DAILY_MISSION_SOLVED",
+                ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
