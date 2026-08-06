@@ -346,6 +346,14 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "DAILY_MISSION_NOT_FOUND",
                 ex.getMessage(), request);
     }
+
+
+    @ExceptionHandler(DailyMissionSolvedException.class)
+    public ResponseEntity<ErrorResponse> handleDailyMissionSolvedException(
+            DailyMissionSolvedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "DAILY_MISSION_SOLVED",
+                ex.getMessage(), request);
+    }
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String errorKey, String message, HttpServletRequest request) {
         ErrorDetails details = new ErrorDetails(request.getRequestURI(), status.value(), errorKey, message, Instant.now());
         return ResponseEntity.status(status).body(ErrorResponse.of(details));
