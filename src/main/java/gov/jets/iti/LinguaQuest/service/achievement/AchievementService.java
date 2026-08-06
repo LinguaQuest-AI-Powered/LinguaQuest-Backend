@@ -77,11 +77,36 @@ public class AchievementService {
                         user,
                         NotificationType.ACHIEVEMENT_EARNED,
                         "Trophy earned: " + achievement.getName(),
-                        achievement.getDescription()
+                        buildEarnedNotificationBody(achievement, xp, coins)
                 );
             }
 
             userAchievementRepository.save(ua);
         }
+    }
+
+    private String buildEarnedNotificationBody(Achievement achievement, int xp, int coins) {
+        String rewardLine = buildRewardLine(xp, coins);
+        if (rewardLine.isEmpty()) {
+            return "You completed: " + lowerFirst(achievement.getDescription());
+        }
+        return "You completed: " + lowerFirst(achievement.getDescription()) + " — earning " + rewardLine + "!";
+    }
+
+    private String lowerFirst(String text) {
+        if (text == null || text.isEmpty()) return text;
+        return Character.toLowerCase(text.charAt(0)) + text.substring(1);
+    }
+    private String buildRewardLine(int xp, int coins) {
+        if (xp > 0 && coins > 0) {
+            return coins + " coins and " + xp + " XP";
+        }
+        if (coins > 0) {
+            return coins + " coins";
+        }
+        if (xp > 0) {
+            return xp + " XP";
+        }
+        return "";
     }
 }
