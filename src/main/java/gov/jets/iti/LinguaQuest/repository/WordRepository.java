@@ -170,4 +170,6 @@ public interface WordRepository extends JpaRepository<Word, Long> {
     Optional<Word> findRandomWordByLanguage(@Param("languageId") Long languageId);
 
     Optional<Word> findWordByWordCodeAndLanguage(String wordCode, Language targetLanguage);
+
+    Optional<Word> findWordByText(String text);
 }
