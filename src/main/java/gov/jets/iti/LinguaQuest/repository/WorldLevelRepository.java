@@ -1,5 +1,6 @@
 package gov.jets.iti.LinguaQuest.repository;
 
+import gov.jets.iti.LinguaQuest.dto.world.WorldLevelCountView;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,11 @@ public interface WorldLevelRepository extends JpaRepository<WorldLevel,Long> {
         ORDER BY wl.orderIndex
         """)
     List<WorldLevel> findWorldLevels(Long worldId);
+
+    @Query("""
+    SELECT wl.world.id AS worldId, COUNT(wl) AS cnt
+    FROM WorldLevel wl
+    GROUP BY wl.world.id
+    """)
+    List<WorldLevelCountView> countLevelsGroupedByWorld();
 }
