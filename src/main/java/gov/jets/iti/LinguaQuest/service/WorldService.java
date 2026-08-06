@@ -1,9 +1,6 @@
 package gov.jets.iti.LinguaQuest.service;
 
-import gov.jets.iti.LinguaQuest.dto.world.LevelDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldLevelsResponseDto;
-import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
+import gov.jets.iti.LinguaQuest.dto.world.*;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
@@ -19,10 +16,7 @@ import gov.jets.iti.LinguaQuest.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -152,11 +146,18 @@ public class WorldService {
 
     public WorldsResponseDto getExploreWorldsPreview(Long userId, Long languageId, int limit) {
         List<World> allWorlds = worldRepository.findAll();
-        List<WorldDto> worldDtos = new ArrayList<>();
 
+        Map<Long, Long> totalLevelsByWorld = worldLevelRepository.countLevelsGroupedByWorld().stream()
+                .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
+
+        Map<Long, Long> completedLevelsByWorld = userLevelProgressRepository
+                .countCompletedLevelsGroupedByWorld(userId, languageId).stream()
+                .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
+
+        List<WorldDto> worldDtos = new ArrayList<>();
         for (World world : allWorlds) {
-            long worldLevelCount = worldLevelRepository.countWorldLevelByWorld(world);
-            long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId, world.getId(), languageId);
+            long worldLevelCount = totalLevelsByWorld.getOrDefault(world.getId(), 0L);
+            long worldCompletedLevels = completedLevelsByWorld.getOrDefault(world.getId(), 0L);
             long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
             worldDtos.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
         }
@@ -167,6 +168,36 @@ public class WorldService {
                 .toList();
 
         return new WorldsResponseDto(topWorlds.size(), topWorlds);
+    }
+
+    public Optional<ContinueLevelDto> getContinueTarget(Long userId) {
+        UserLanguage activeUserLanguage = getActiveUserLanguage(userId);
+        Long languageId = activeUserLanguage.getLanguage().getId();
+
+        List<Long> worldIds = userLevelProgressRepository
+                .findWorldIdsOrderedByRecentActivity(userId, languageId);
+
+        for (Long worldId : worldIds) {
+            WorldLevelsResponseDto worldLevels = getWorldLevels(userId, worldId);
+
+            Optional<LevelDto> target = worldLevels.levels().stream()
+                    .filter(l -> l.getStatus() == LevelStatus.INPROGRESS
+                            || l.getStatus() == LevelStatus.AVAILABLE)
+                    .findFirst();
+
+            if (target.isPresent()) {
+                LevelDto level = target.get();
+                return Optional.of(new ContinueLevelDto(
+                        worldId,
+                        worldLevels.name(),
+                        level.getId(),
+                        level.getOrder(),
+                        level.getWord()
+                ));
+            }
+        }
+
+        return Optional.empty();
     }
 
     private WorldDto mapWorldToWorldDto(World world,long worldLevelCount, long worldCompletedLevels, long progressPercent) {
