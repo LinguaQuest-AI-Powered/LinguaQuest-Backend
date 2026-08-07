@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -87,11 +88,21 @@ public class NotificationService {
         return new DeleteNotificationResponse("success");
     }
 
-    public void broadcastNotification(String title, String body) {
+    @Transactional
+    public void broadcastNotification(NotificationType notificationType,String title, String body) {
+        List<Notification> notifications = new ArrayList<>();
         List<DeviceToken> deviceTokens = deviceTokenRepository.findAll();
         for(DeviceToken token : deviceTokens) {
+            Notification notification = Notification.builder()
+                    .user(token.getUser())
+                    .type(notificationType)
+                    .title(title)
+                    .body(body)
+                    .build();
+            notifications.add(notification);
             fcmPushSender.send(token.getToken(), title, body);
         }
+        notificationRepository.saveAll(notifications);
     }
 
     private NotificationDto toDto(Notification notification) {
