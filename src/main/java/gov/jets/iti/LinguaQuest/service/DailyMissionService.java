@@ -12,10 +12,7 @@ import gov.jets.iti.LinguaQuest.exception.DailyMissionWordNotFound;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.language.WordNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.world.InvalidImageException;
-import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
-import gov.jets.iti.LinguaQuest.repository.UserDailyMissionRepository;
-import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
-import gov.jets.iti.LinguaQuest.repository.WordRepository;
+import gov.jets.iti.LinguaQuest.repository.*;
 import gov.jets.iti.LinguaQuest.service.notification.NotificationService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
@@ -42,6 +39,7 @@ public class DailyMissionService {
     private final UserDailyMissionRepository userDailyMissionRepository;
     private final AIService aiService;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
     private final Integer XPEARNED = 25;
     private final Integer COINSEARNED = 25;
 
@@ -92,6 +90,7 @@ public class DailyMissionService {
                 .word(word1)
                 .build();
         userDailyMissionRepository.save(userDailyMission);
+        userRepository.updateXpAndCoins(user.getId(),user.getXp() + XPEARNED, user.getCoins() + COINSEARNED);
         return new DailyMissionVerificationResponse(isMatch,XPEARNED,COINSEARNED);
     }
 

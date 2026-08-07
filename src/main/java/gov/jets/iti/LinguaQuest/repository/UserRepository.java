@@ -53,4 +53,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         LIMIT :limit OFFSET :offset
         """, nativeQuery = true)
     List<User> findSurroundingUsers(@Param("offset") int offset, @Param("limit") int limit);
+
+    @Modifying
+    @Query("UPDATE User u SET u.xp = :xp, u.coins = :coins WHERE u.id = :id")
+    int updateXpAndCoins(@Param("id") Long id, @Param("xp") Integer xp, @Param("coins") Integer coins);
 }
