@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -91,15 +93,18 @@ public class NotificationService {
     @Transactional
     public void broadcastNotification(NotificationType notificationType,String title, String body) {
         List<Notification> notifications = new ArrayList<>();
+        Set<User> notifiedUsers = new HashSet<>();
         List<DeviceToken> deviceTokens = deviceTokenRepository.findAll();
         for(DeviceToken token : deviceTokens) {
-            Notification notification = Notification.builder()
-                    .user(token.getUser())
-                    .type(notificationType)
-                    .title(title)
-                    .body(body)
-                    .build();
-            notifications.add(notification);
+
+            if (notifiedUsers.add(token.getUser())) {
+                notifications.add(Notification.builder()
+                        .user(token.getUser())
+                        .type(notificationType)
+                        .title(title)
+                        .body(body)
+                        .build());
+            }
             fcmPushSender.send(token.getToken(), title, body);
         }
         notificationRepository.saveAll(notifications);
