@@ -87,6 +87,13 @@ public class NotificationService {
         return new DeleteNotificationResponse("success");
     }
 
+    public void broadcastNotification(String title, String body) {
+        List<DeviceToken> deviceTokens = deviceTokenRepository.findAll();
+        for(DeviceToken token : deviceTokens) {
+            fcmPushSender.send(token.getToken(), title, body);
+        }
+    }
+
     private NotificationDto toDto(Notification notification) {
         return new NotificationDto(
                 notification.getId(),
