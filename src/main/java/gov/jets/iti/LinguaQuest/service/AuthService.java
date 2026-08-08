@@ -2,6 +2,7 @@ package gov.jets.iti.LinguaQuest.service;
 
 import gov.jets.iti.LinguaQuest.dto.auth.request.*;
 import gov.jets.iti.LinguaQuest.dto.auth.response.*;
+import gov.jets.iti.LinguaQuest.dto.language.NativeLanguageDto;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.enums.SignInProvider;
@@ -123,7 +124,7 @@ public class AuthService {
 
     private UserDto mapUserPrincipleToUserDto(UserPrinciple userPrinciple,Set<Language> targetLanguages) {
         return new UserDto(userPrinciple.user().getId(), userPrinciple.user().getUsername(),userPrinciple.user().getPhoto()
-        ,userPrinciple.user().getNativeLanguage().getName(),userPrinciple.user().getIsVerified(),targetLanguages);
+        ,mapNativeLanguageToDto(userPrinciple.user().getNativeLanguage()),userPrinciple.user().getIsVerified(),targetLanguages);
     }
 
     private RegisterResponseDto mapUserToRegisterResponseDto(User user){
@@ -187,5 +188,9 @@ public class AuthService {
         byte[] bytes = new byte[32];
         new SecureRandom().nextBytes(bytes);
         return "rst_" + Hex.encodeHexString(bytes);
+    }
+
+    private NativeLanguageDto mapNativeLanguageToDto(Language language){
+        return new NativeLanguageDto(language.getId(),language.getName(),language.getCode(),language.getImageUrl());
     }
 }
