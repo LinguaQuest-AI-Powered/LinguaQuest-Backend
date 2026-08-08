@@ -1,6 +1,7 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import com.google.firebase.auth.FirebaseToken;
+import gov.jets.iti.LinguaQuest.dto.language.NativeLanguageDto;
 import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.enums.Role;
 import gov.jets.iti.LinguaQuest.dto.auth.response.OAuthResponseDto;
@@ -115,12 +116,12 @@ public class OAuthService {
 
         boolean profileComplete = user.isProfileComplete();
         Set<Language> targetLanguage = userLanguageRepository.findLanguageByUserId(user.getId());
-        String nativeLanguageName = user.getNativeLanguage() != null ? user.getNativeLanguage().getName() : null;
+        NativeLanguageDto nativeLanguage = user.getNativeLanguage() != null ? mapNativeLanguageToDto(user.getNativeLanguage()) : null;
         UserDto userDto = new UserDto(
                 user.getId(),
                 user.getUsername(),
                 user.getPhoto(),
-                nativeLanguageName,
+                nativeLanguage,
                 user.getIsVerified(),
                 targetLanguage
         );
@@ -184,5 +185,8 @@ public class OAuthService {
             }
         }
         return SignInProvider.GOOGLE;
+    }
+    private NativeLanguageDto mapNativeLanguageToDto(Language language){
+        return new NativeLanguageDto(language.getId(),language.getName(),language.getCode(),language.getImageUrl());
     }
 }

@@ -58,7 +58,7 @@ public class User {
     @Column(name = "photo_public_id", length = 200)
     private String photoPublicId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "native_language_id")
     private Language nativeLanguage;
 
