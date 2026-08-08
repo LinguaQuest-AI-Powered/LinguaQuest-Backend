@@ -14,7 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -85,6 +88,26 @@ public class NotificationService {
     public DeleteNotificationResponse deleteAll(Long userId) {
         notificationRepository.deleteByUserId(userId);
         return new DeleteNotificationResponse("success");
+    }
+
+    @Transactional
+    public void broadcastNotification(NotificationType notificationType,String title, String body) {
+        List<Notification> notifications = new ArrayList<>();
+        Set<User> notifiedUsers = new HashSet<>();
+        List<DeviceToken> deviceTokens = deviceTokenRepository.findAll();
+        for(DeviceToken token : deviceTokens) {
+
+            if (notifiedUsers.add(token.getUser())) {
+                notifications.add(Notification.builder()
+                        .user(token.getUser())
+                        .type(notificationType)
+                        .title(title)
+                        .body(body)
+                        .build());
+            }
+            fcmPushSender.send(token.getToken(), title, body);
+        }
+        notificationRepository.saveAll(notifications);
     }
 
     private NotificationDto toDto(Notification notification) {
