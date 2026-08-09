@@ -145,7 +145,12 @@ public class WorldService {
     }
 
     public WorldsResponseDto getExploreWorldsPreview(Long userId, Long languageId, int limit) {
+        List<Long> orderedWorldIds = userLevelProgressRepository
+                .findWorldIdsOrderedByRecentActivity(userId, languageId);
+
         List<World> allWorlds = worldRepository.findAll();
+        Map<Long, World> worldsById = allWorlds.stream()
+                .collect(Collectors.toMap(World::getId, w -> w));
 
         Map<Long, Long> totalLevelsByWorld = worldLevelRepository.countLevelsGroupedByWorld().stream()
                 .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
@@ -154,18 +159,49 @@ public class WorldService {
                 .countCompletedLevelsGroupedByWorld(userId, languageId).stream()
                 .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
 
-        List<WorldDto> worldDtos = new ArrayList<>();
-        for (World world : allWorlds) {
-            long worldLevelCount = totalLevelsByWorld.getOrDefault(world.getId(), 0L);
-            long worldCompletedLevels = completedLevelsByWorld.getOrDefault(world.getId(), 0L);
+        List<WorldDto> topWorlds = new ArrayList<>();
+        Set<Long> consideredWorldIds = new HashSet<>();
+
+        for (Long worldId : orderedWorldIds) {
+            if (topWorlds.size() == limit) break;
+
+            World world = worldsById.get(worldId);
+            if (world == null) continue;
+
+            long worldLevelCount = totalLevelsByWorld.getOrDefault(worldId, 0L);
+            long worldCompletedLevels = completedLevelsByWorld.getOrDefault(worldId, 0L);
             long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
-            worldDtos.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
+
+            consideredWorldIds.add(worldId);
+            if (progressPercent >= 100) continue;
+
+            topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
         }
 
-        List<WorldDto> topWorlds = worldDtos.stream()
-                .sorted(Comparator.comparingLong(WorldDto::completedLevels).reversed())
-                .limit(limit)
-                .toList();
+        if (topWorlds.size() < limit) {
+            for (World world : allWorlds) {
+                if (topWorlds.size() == limit) break;
+                if (consideredWorldIds.contains(world.getId())) continue;
+
+                long worldLevelCount = totalLevelsByWorld.getOrDefault(world.getId(), 0L);
+                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, 0L, 0L));
+            }
+        }
+
+        if (topWorlds.isEmpty()) {
+            for (Long worldId : orderedWorldIds) {
+                if (topWorlds.size() == limit) break;
+
+                World world = worldsById.get(worldId);
+                if (world == null) continue;
+
+                long worldLevelCount = totalLevelsByWorld.getOrDefault(worldId, 0L);
+                long worldCompletedLevels = completedLevelsByWorld.getOrDefault(worldId, 0L);
+                long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
+
+                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
+            }
+        }
 
         return new WorldsResponseDto(topWorlds.size(), topWorlds);
     }
