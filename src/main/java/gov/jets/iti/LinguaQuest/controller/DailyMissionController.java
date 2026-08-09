@@ -24,8 +24,8 @@ public class DailyMissionController {
     private final DailyMissionService dailyMissionService;
     @GetMapping(version = "v1")
     public ResponseEntity<SuccessResponse<DailyMissionResponse>> getTodayMission(@AuthenticationPrincipal UserPrinciple userPrinciple) {
-        String todayWord = dailyMissionService.getDailyWord(userPrinciple);
-        return ResponseEntity.ok(new SuccessResponse<>(true, new DailyMissionResponse(todayWord)));
+        DailyMissionResponse todayWord = dailyMissionService.getDailyWord(userPrinciple);
+        return ResponseEntity.ok(new SuccessResponse<>(true, todayWord));
     }
 
     @PostMapping(value = "/verify", version = "v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

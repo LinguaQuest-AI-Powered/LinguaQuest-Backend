@@ -46,7 +46,7 @@ public class DailyMissionService {
 
     private static final String DAILY_WORD_KEY = "DAILY_WORD_CODE_KEY";
 
-    public String getDailyWord(UserPrinciple userPrinciple) {
+    public DailyMissionResponse getDailyWord(UserPrinciple userPrinciple) {
         String dailyWordCode = getDailyWord();
         if(dailyWordCode == null) {
             throw new DailyMissionWordNotFound("Cannot find a daily mission for today");
@@ -56,7 +56,13 @@ public class DailyMissionService {
 
         Word word = wordRepository.findWordByWordCodeAndLanguage(dailyWordCode, userLanguage.getLanguage())
                 .orElseThrow(() -> new WordNotFoundException("Word Not found in your Active language"));
-        return word.getText();
+        boolean isSolved = false;
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        Optional<UserDailyMission> userDailyMissionOptional = userDailyMissionRepository.findByUserAndMissionDate(userPrinciple.user(),today);
+        if(userDailyMissionOptional.isPresent()){
+            isSolved = true;
+        }
+        return new DailyMissionResponse(word.getText(),isSolved);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
