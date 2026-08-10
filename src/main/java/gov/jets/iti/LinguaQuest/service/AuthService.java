@@ -159,6 +159,7 @@ public class AuthService {
         return new PasswordResetOtpVerifyResponse(rawToken, RESET_TOKEN_TTL.toSeconds());
     }
 
+    @Transactional
     public void setNewPassword(ForgetPasswordRequest request) {
         String hashedToken = DigestUtils.sha256Hex(request.resetToken());
         String key = RESET_TOKEN_PREFIX + hashedToken;
