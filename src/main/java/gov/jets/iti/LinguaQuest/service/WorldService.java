@@ -1,16 +1,20 @@
 package gov.jets.iti.LinguaQuest.service;
 
 import gov.jets.iti.LinguaQuest.dto.world.*;
+import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.entity.UserLevelProgress;
 import gov.jets.iti.LinguaQuest.entity.World;
 import gov.jets.iti.LinguaQuest.entity.WorldLevel;
 import gov.jets.iti.LinguaQuest.enums.Difficulty;
 import gov.jets.iti.LinguaQuest.enums.LevelStatus;
+import gov.jets.iti.LinguaQuest.enums.TranslatableEntityType;
+import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.language.NoActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.world.WorldNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
+import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldLevelRepository;
 import gov.jets.iti.LinguaQuest.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,18 +32,27 @@ public class WorldService {
     private final WorldLevelRepository worldLevelRepository;
     private final UserLevelProgressRepository userLevelProgressRepository;
     private final UserLanguageRepository userLanguageRepository;
+    private final UserRepository userRepository;
+    private final TranslationResolverService translationResolver;
 
     public WorldsResponseDto getAllWorlds(Long userId, Difficulty difficulty) {
 
-
         UserLanguage userLanguage = userLanguageRepository.findActiveByUserIdWithLanguage(userId)
                 .orElseThrow(() -> new NoActiveLanguageException("user with Id " + userId + " doesn't have an active language"));
+
+        Long nativeLanguageId = getUserNativeLanguageId(userId);
+
         List<World> worldDtoList;
         if(difficulty == Difficulty.ALL) {
             worldDtoList = worldRepository.findAll();
         }else {
             worldDtoList = worldRepository.findWorldByDifficulty(difficulty);
         }
+
+        List<Long> worldIds = worldDtoList.stream().map(World::getId).toList();
+        Map<Long, Map<String, String>> translations =
+                translationResolver.resolveBatch(TranslatableEntityType.WORLD, worldIds, nativeLanguageId);
+
         List<WorldDto> worldDtos = new ArrayList<>();
 
         for(World world : worldDtoList) {
@@ -47,7 +60,7 @@ public class WorldService {
             long worldCompletedLevels = userLevelProgressRepository.countCompletedLevels(userId,world.getId(),userLanguage.getLanguage().getId());
             long progressPercent = worldLevelCount != 0 ? ((worldCompletedLevels* 100) / worldLevelCount) : 0 ;
 
-            WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent);
+            WorldDto worldDto = mapWorldToWorldDto(world,worldLevelCount,worldCompletedLevels,progressPercent,translations);
             worldDtos.add(worldDto);
         }
         return new WorldsResponseDto(worldDtos.size(),worldDtos);
@@ -57,6 +70,12 @@ public class WorldService {
 
         UserLanguage userLanguage = getActiveUserLanguage(userId);
         World world = getWorld(worldId);
+
+        Long nativeLanguageId = getUserNativeLanguageId(userId);
+        String worldName = translationResolver
+                .resolveBatch(TranslatableEntityType.WORLD, List.of(worldId), nativeLanguageId)
+                .getOrDefault(worldId, Map.of())
+                .getOrDefault("name", world.getName());
 
         List<UserLevelProgress> progressLevels =
                 userLevelProgressRepository.findUserProgressLevels(
@@ -72,10 +91,16 @@ public class WorldService {
 
         return new WorldLevelsResponseDto(
                 worldId,
-                world.getName(),
+                worldName,
                 world.getDifficulty(),
                 levels
         );
+    }
+
+    private Long getUserNativeLanguageId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EmailNotFoundException("User not found"));
+        return user.getNativeLanguage().getId();
     }
 
     private UserLanguage getActiveUserLanguage(Long userId) {
@@ -152,6 +177,11 @@ public class WorldService {
         Map<Long, World> worldsById = allWorlds.stream()
                 .collect(Collectors.toMap(World::getId, w -> w));
 
+        Long nativeLanguageId = getUserNativeLanguageId(userId);
+        List<Long> allWorldIds = allWorlds.stream().map(World::getId).toList();
+        Map<Long, Map<String, String>> translations =
+                translationResolver.resolveBatch(TranslatableEntityType.WORLD, allWorldIds, nativeLanguageId);
+
         Map<Long, Long> totalLevelsByWorld = worldLevelRepository.countLevelsGroupedByWorld().stream()
                 .collect(Collectors.toMap(WorldLevelCountView::getWorldId, WorldLevelCountView::getCnt));
 
@@ -175,7 +205,7 @@ public class WorldService {
             consideredWorldIds.add(worldId);
             if (progressPercent >= 100) continue;
 
-            topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
+            topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent, translations));
         }
 
         if (topWorlds.size() < limit) {
@@ -184,7 +214,7 @@ public class WorldService {
                 if (consideredWorldIds.contains(world.getId())) continue;
 
                 long worldLevelCount = totalLevelsByWorld.getOrDefault(world.getId(), 0L);
-                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, 0L, 0L));
+                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, 0L, 0L, translations));
             }
         }
 
@@ -199,7 +229,7 @@ public class WorldService {
                 long worldCompletedLevels = completedLevelsByWorld.getOrDefault(worldId, 0L);
                 long progressPercent = worldLevelCount == 0 ? 0 : (worldCompletedLevels * 100) / worldLevelCount;
 
-                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent));
+                topWorlds.add(mapWorldToWorldDto(world, worldLevelCount, worldCompletedLevels, progressPercent, translations));
             }
         }
 
@@ -236,8 +266,11 @@ public class WorldService {
         return Optional.empty();
     }
 
-    private WorldDto mapWorldToWorldDto(World world,long worldLevelCount, long worldCompletedLevels, long progressPercent) {
-        return new WorldDto(world.getId(),world.getName(),world.getImageUrl(),world.getDifficulty(),
-                progressPercent,worldLevelCount,worldCompletedLevels);
+    private WorldDto mapWorldToWorldDto(World world, long worldLevelCount, long worldCompletedLevels,
+                                        long progressPercent, Map<Long, Map<String, String>> translations) {
+        String name = translations.getOrDefault(world.getId(), Map.of())
+                .getOrDefault("name", world.getName());
+        return new WorldDto(world.getId(), name, world.getImageUrl(), world.getDifficulty(),
+                progressPercent, worldLevelCount, worldCompletedLevels);
     }
 }
