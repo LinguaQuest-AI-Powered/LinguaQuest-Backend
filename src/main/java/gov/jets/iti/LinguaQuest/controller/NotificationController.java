@@ -5,15 +5,19 @@ import gov.jets.iti.LinguaQuest.dto.notification.response.DeleteNotificationResp
 import gov.jets.iti.LinguaQuest.dto.notification.response.MarkReadResponse;
 import gov.jets.iti.LinguaQuest.dto.notification.response.NotificationsListDto;
 import gov.jets.iti.LinguaQuest.dto.notification.response.UnreadCountResponse;
+import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.enums.NotificationType;
 import gov.jets.iti.LinguaQuest.service.notification.NotificationService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final MessageSource messageSource;
 
     @GetMapping
     public ResponseEntity<SuccessResponse<NotificationsListDto>> list(
@@ -67,8 +72,7 @@ public class NotificationController {
     public ResponseEntity<SuccessResponse<String>> sendTestNotification(
             @AuthenticationPrincipal UserPrinciple principal,
             @RequestParam(defaultValue = "SYSTEM") String type,
-            @RequestParam(defaultValue = "Test Notification") String title,
-            @RequestParam(defaultValue = "This is a test notification from LinguaQuest.") String body) {
+            @RequestParam(defaultValue = "test.notification") String messageKey) {
 
         NotificationType notificationType;
         try {
@@ -77,7 +81,13 @@ public class NotificationController {
             throw new IllegalArgumentException("Invalid notification type: " + type);
         }
 
-        notificationService.send(principal.user(), notificationType, title, body);
-        return ResponseEntity.ok(new SuccessResponse<>(true, "Test notification sent to user " + principal.user().getId()));
+        User user = principal.user();
+        Locale locale = Locale.forLanguageTag(user.getNativeLanguage().getCode());
+
+        String title = messageSource.getMessage(messageKey + ".title", null, locale);
+        String body = messageSource.getMessage(messageKey + ".body", null, locale);
+
+        notificationService.send(user, notificationType, title, body);
+        return ResponseEntity.ok(new SuccessResponse<>(true, "Test notification sent to user " + user.getId()));
     }
 }

@@ -69,7 +69,7 @@ public class DailyMissionService {
     public void generateTodayWord() {
         Optional<Word> newWord = wordRepository.findRandomWordByLanguage(1L);
         newWord.ifPresent(word -> saveDailyWord(word.getWordCode()));
-        notificationService.broadcastNotification(NotificationType.DAILY_MISSION_AVAILABLE,"New Daily Mission!","A fresh word is waiting for you. Snap a photo and earn XP + coins!");
+        notificationService.broadcastNotification(NotificationType.DAILY_MISSION_AVAILABLE, "daily.mission");
     }
 
     @Transactional
