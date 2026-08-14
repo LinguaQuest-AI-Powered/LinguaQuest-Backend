@@ -9,15 +9,13 @@ import gov.jets.iti.LinguaQuest.exception.NotificationNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.DeviceTokenRepository;
 import gov.jets.iti.LinguaQuest.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +24,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final DeviceTokenRepository deviceTokenRepository;
     private final FcmPushSender fcmPushSender;
+    private final MessageSource messageSource;
 
     @Transactional
     public void send(User user, NotificationType type, String title, String body) {
@@ -91,15 +90,21 @@ public class NotificationService {
     }
 
     @Transactional
-    public void broadcastNotification(NotificationType notificationType,String title, String body) {
+    public void broadcastNotification(NotificationType notificationType, String messageKey) {
         List<Notification> notifications = new ArrayList<>();
         Set<User> notifiedUsers = new HashSet<>();
         List<DeviceToken> deviceTokens = deviceTokenRepository.findAll();
-        for(DeviceToken token : deviceTokens) {
 
-            if (notifiedUsers.add(token.getUser())) {
+        for (DeviceToken token : deviceTokens) {
+            User user = token.getUser();
+            Locale locale = Locale.forLanguageTag(user.getNativeLanguage().getCode());
+
+            String title = messageSource.getMessage(messageKey + ".title", null, locale);
+            String body = messageSource.getMessage(messageKey + ".body", null, locale);
+
+            if (notifiedUsers.add(user)) {
                 notifications.add(Notification.builder()
-                        .user(token.getUser())
+                        .user(user)
                         .type(notificationType)
                         .title(title)
                         .body(body)
@@ -109,7 +114,6 @@ public class NotificationService {
         }
         notificationRepository.saveAll(notifications);
     }
-
     private NotificationDto toDto(Notification notification) {
         return new NotificationDto(
                 notification.getId(),
