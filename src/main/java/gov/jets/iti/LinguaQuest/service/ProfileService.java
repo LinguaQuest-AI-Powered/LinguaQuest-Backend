@@ -153,6 +153,10 @@ public class ProfileService {
             throw new InvalidPasswordException("Incorrect old password");
         }
 
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+            throw new InvalidPasswordException("New password must be different from your current password");
+        }
+
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
     }
