@@ -7,6 +7,7 @@ import gov.jets.iti.LinguaQuest.dto.world.ContinueLevelDto;
 import gov.jets.iti.LinguaQuest.dto.world.WorldsResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
+import gov.jets.iti.LinguaQuest.enums.TranslatableEntityType;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -23,6 +25,7 @@ public class HomeService {
     private final UserRepository userRepository;
     private final UserLanguageRepository userLanguageRepository;
     private final WorldService worldService;
+    private final TranslationResolverService translationResolver;
 
     public HomeResponse getHome(Long userId){
         User user = userRepository.findById(userId).orElseThrow(
@@ -35,11 +38,18 @@ public class HomeService {
 
         if (userLanguageOpt.isPresent()) {
             UserLanguage userLanguage = userLanguageOpt.get();
+            Long targetLanguageId = userLanguage.getLanguage().getId();
+            Long nativeLanguageId = user.getNativeLanguage().getId();
 
-            exploreWorlds = worldService.getExploreWorldsPreview(userId, userLanguage.getLanguage().getId(), 2);
+            String targetLanguageName = translationResolver
+                    .resolveBatch(TranslatableEntityType.LANGUAGE, List.of(targetLanguageId), nativeLanguageId)
+                    .getOrDefault(targetLanguageId, Map.of())
+                    .getOrDefault("name", userLanguage.getLanguage().getName());
+
+            exploreWorlds = worldService.getExploreWorldsPreview(userId, targetLanguageId, 2);
             activeLanguage  = new UserLanguageDto(
-                    userLanguage.getLanguage().getId(),
-                    userLanguage.getLanguage().getName(),
+                    targetLanguageId,
+                    targetLanguageName,
                     userLanguage.getLanguage().getCode(),
                     userLanguage.getLanguage().getImageUrl(),
                     userLanguage.getLevel(),
