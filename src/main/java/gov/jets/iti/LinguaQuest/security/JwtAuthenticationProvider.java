@@ -1,7 +1,6 @@
 package gov.jets.iti.LinguaQuest.security;
 
 import gov.jets.iti.LinguaQuest.entity.User;
-import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import gov.jets.iti.LinguaQuest.service.UserService;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
@@ -28,16 +27,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
         String password = authentication.getCredentials().toString();
-        User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new EmailNotFoundException("Invalid Email or Password"));
-        List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(user.getRole().name()));
-        if(passwordEncoder.matches(password,user.getPassword())){
+        User user = userRepository.findUserByEmail(email).orElse(null);
+
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority(user.getRole().name()));
             UserPrinciple userPrinciple = new UserPrinciple(user);
-            return new UsernamePasswordAuthenticationToken(userPrinciple,null,authorities);
-        }else {
-            throw new BadCredentialsException("Invalid Credentials!");
+            return new UsernamePasswordAuthenticationToken(userPrinciple, null, authorities);
         }
+
+        throw new BadCredentialsException("Invalid email or password");
     }
 
     @Override
