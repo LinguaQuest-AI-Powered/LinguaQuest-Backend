@@ -6,6 +6,7 @@ import gov.jets.iti.LinguaQuest.entity.Language;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.enums.AchievementTrigger;
+import gov.jets.iti.LinguaQuest.enums.TranslatableEntityType;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveActiveLanguageException;
 import gov.jets.iti.LinguaQuest.exception.language.CannotRemoveLastLanguageException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -32,15 +34,21 @@ public class LanguageService {
     private final UserLanguageRepository userLanguageRepository;
     private final UserRepository userRepository;
     private final AchievementService achievementService;
+    private final TranslationResolverService translationResolver;
 
     public AvailableLanguagesResponse getAvailableLanguages(Long userId) {
         List<Language> languagesList = languageRepository.findAllByOrderByNameAsc();
         Set<Long> addedLanguagesIds = userLanguageRepository.findLanguageIdsByUserId(userId);
 
+        Long viewerLanguageId = getUserNativeLanguageId(userId);
+        List<Long> allLanguageIds = languagesList.stream().map(Language::getId).toList();
+        Map<Long, Map<String, String>> translations = translationResolver
+                .resolveBatch(TranslatableEntityType.LANGUAGE, allLanguageIds, viewerLanguageId);
+
         List<LanguageOptionDto> languages = languagesList.stream()
                 .map(language -> new LanguageOptionDto(
                         language.getId(),
-                        language.getName(),
+                        resolveName(language, translations),
                         language.getCode(),
                         language.getImageUrl(),
                         addedLanguagesIds.contains(language.getId())
@@ -49,17 +57,26 @@ public class LanguageService {
 
         return new AvailableLanguagesResponse(languages);
     }
+
     public MyLanguagesResponse getMyLanguages(Long userId){
         List<UserLanguage> userLanguagesList = userLanguageRepository.findAllByUserIdWithLanguage(userId);
+
+        Long viewerLanguageId = getUserNativeLanguageId(userId);
+        List<Long> languageIds = userLanguagesList.stream()
+                .map(ul -> ul.getLanguage().getId())
+                .toList();
+        Map<Long, Map<String, String>> translations = translationResolver
+                .resolveBatch(TranslatableEntityType.LANGUAGE, languageIds, viewerLanguageId);
+
         List<UserLanguageDto> languages = userLanguagesList.stream()
                 .map(userLanguage -> new UserLanguageDto(
-                            userLanguage.getLanguage().getId(),
-                            userLanguage.getLanguage().getName(),
-                            userLanguage.getLanguage().getCode(),
-                            userLanguage.getLanguage().getImageUrl(),
-                            userLanguage.getLevel(),
-                            userLanguage.isActive(),
-                            userLanguage.getProgressPercent()
+                        userLanguage.getLanguage().getId(),
+                        resolveName(userLanguage.getLanguage(), translations),
+                        userLanguage.getLanguage().getCode(),
+                        userLanguage.getLanguage().getImageUrl(),
+                        userLanguage.getLevel(),
+                        userLanguage.isActive(),
+                        userLanguage.getProgressPercent()
                 ))
                 .toList();
 
@@ -113,7 +130,7 @@ public class LanguageService {
             throw new CannotRemoveLastLanguageException(
                     "You must have at least one language in your profile.");
         }
-            userLanguageRepository.deleteAll(userLanguages);
+        userLanguageRepository.deleteAll(userLanguages);
 
         return getMyLanguages(userId);
     }
@@ -127,9 +144,15 @@ public class LanguageService {
         userLanguageRepository.deactivateAllExcept(userId,userLanguage.getId());
         userLanguageRepository.save(userLanguage);
 
+        Long viewerLanguageId = getUserNativeLanguageId(userId);
+        String name = translationResolver
+                .resolveBatch(TranslatableEntityType.LANGUAGE, List.of(languageId), viewerLanguageId)
+                .getOrDefault(languageId, Map.of())
+                .getOrDefault("name", userLanguage.getLanguage().getName());
+
         UserLanguageDto userLanguageDto = new UserLanguageDto(
                 userLanguage.getLanguage().getId(),
-                userLanguage.getLanguage().getName(),
+                name,
                 userLanguage.getLanguage().getCode(),
                 userLanguage.getLanguage().getImageUrl(),
                 userLanguage.getLevel(),
@@ -165,6 +188,23 @@ public class LanguageService {
         }
         user.setNativeLanguage(language);
         userRepository.save(user);
-        return new NativeLanguageDto(language.getId(),language.getName(),language.getCode(),language.getImageUrl());
+
+        String name = translationResolver
+                .resolveBatch(TranslatableEntityType.LANGUAGE, List.of(languageId), languageId)
+                .getOrDefault(languageId, Map.of())
+                .getOrDefault("name", language.getName());
+
+        return new NativeLanguageDto(language.getId(), name, language.getCode(), language.getImageUrl());
+    }
+
+    private Long getUserNativeLanguageId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EmailNotFoundException("User not found"));
+        return user.getNativeLanguage() != null ? user.getNativeLanguage().getId() : null;
+    }
+
+    private String resolveName(Language language, Map<Long, Map<String, String>> translations) {
+        return translations.getOrDefault(language.getId(), Map.of())
+                .getOrDefault("name", language.getName());
     }
 }

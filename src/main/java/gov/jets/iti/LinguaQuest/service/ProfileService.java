@@ -12,6 +12,7 @@ import gov.jets.iti.LinguaQuest.dto.profile.ProfileUpdateResponseDto;
 import gov.jets.iti.LinguaQuest.entity.User;
 import gov.jets.iti.LinguaQuest.entity.UserLanguage;
 import gov.jets.iti.LinguaQuest.enums.SignInProvider;
+import gov.jets.iti.LinguaQuest.enums.TranslatableEntityType;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.profile.InvalidPasswordException;
 import gov.jets.iti.LinguaQuest.exception.profile.UsernameAlreadyExistsException;
@@ -20,6 +21,7 @@ import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLevelProgressRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,12 @@ import gov.jets.iti.LinguaQuest.dto.leaderboard.UserRankDto;
 import gov.jets.iti.LinguaQuest.enums.AchievementStatus;
 import gov.jets.iti.LinguaQuest.service.achievement.AchievementQueryService;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,13 +54,31 @@ public class ProfileService {
     private final PasswordEncoder passwordEncoder;
     private final AchievementQueryService achievementQueryService;
     private final LeaderBoardService leaderBoardService;
+    private final TranslationResolverService translationResolver;
+    private final MessageSource messageSource;
 
     @Transactional(readOnly = true)
     public ProfileResponseDto getProfile(Long userId) {
         User user = userRepository.findByIdWithNativeLanguage(userId)
                 .orElseThrow(() -> new EmailNotFoundException("User not found"));
 
-        String nativeLanguage = user.getNativeLanguage() != null ? user.getNativeLanguage().getName() : null;
+        Optional<UserLanguage> activeLanguageOpt = userLanguageRepository.findActiveByUserIdWithLanguage(userId);
+
+        Long nativeLanguageId = user.getNativeLanguage() != null ? user.getNativeLanguage().getId() : null;
+
+        Set<Long> languageIdsToTranslate = new HashSet<>();
+        if (nativeLanguageId != null) languageIdsToTranslate.add(nativeLanguageId);
+        activeLanguageOpt.ifPresent(ul -> languageIdsToTranslate.add(ul.getLanguage().getId()));
+
+        Map<Long, Map<String, String>> languageTranslations = nativeLanguageId != null
+                ? translationResolver.resolveBatch(TranslatableEntityType.LANGUAGE, languageIdsToTranslate, nativeLanguageId)
+                : Map.of();
+
+        String nativeLanguage = user.getNativeLanguage() != null
+                ? languageTranslations.getOrDefault(nativeLanguageId, Map.of())
+                .getOrDefault("name", user.getNativeLanguage().getName())
+                : null;
+
         int worldsCount = userLevelProgressRepository.countDistinctCompletedWorldsByUserId(userId);
 
         ProfileStatsDto stats = new ProfileStatsDto(
@@ -64,16 +88,24 @@ public class ProfileService {
                 worldsCount
         );
 
-        Optional<UserLanguage> activeLanguageOpt = userLanguageRepository.findActiveByUserIdWithLanguage(userId);
-        CurrentJourneyDto currentJourney = activeLanguageOpt.map(ul -> new CurrentJourneyDto(
-                ul.getLanguage().getId(),
-                ul.getLanguage().getName(),
-                ul.getLanguage().getCode(),
-                ul.getLevel(),
-                deriveJourneyLabel(ul.getLevel()),
-                ul.getCurrentXp(),
-                ul.getNextMilestoneXp()
-        )).orElse(null);
+        Locale locale = user.getNativeLanguage() != null
+                ? Locale.forLanguageTag(user.getNativeLanguage().getCode())
+                : Locale.ENGLISH;
+
+        CurrentJourneyDto currentJourney = activeLanguageOpt.map(ul -> {
+            Long targetLanguageId = ul.getLanguage().getId();
+            String targetLanguageName = languageTranslations.getOrDefault(targetLanguageId, Map.of())
+                    .getOrDefault("name", ul.getLanguage().getName());
+            return new CurrentJourneyDto(
+                    targetLanguageId,
+                    targetLanguageName,
+                    ul.getLanguage().getCode(),
+                    ul.getLevel(),
+                    deriveJourneyLabel(ul.getLevel(), locale),
+                    ul.getCurrentXp(),
+                    ul.getNextMilestoneXp()
+            );
+        }).orElse(null);
 
         List<AchievementDto> allAchievements = achievementQueryService.getAchievements(userId, "ALL").achievements();
         List<AchievementDto> profileAchievements = allAchievements != null ? allAchievements.stream()
@@ -100,7 +132,6 @@ public class ProfileService {
                 leaderboardSnippet
         );
     }
-
 
     // cur handling username only
     @Transactional
@@ -167,7 +198,7 @@ public class ProfileService {
                 .orElseThrow(() -> new EmailNotFoundException("User not found"));
 
         ImageUploadResult uploadResponse = imageService.uploadPhoto(file);
-        
+
         if (user.getPhotoPublicId() != null) {
             try {
                 imageService.deletePhoto(user.getPhotoPublicId());
@@ -184,13 +215,10 @@ public class ProfileService {
         return new PhotoUploadResponseDto(photoUrl);
     }
 
-    private String deriveJourneyLabel(int level) {
-        if (level <= 5) {
-            return "Beginner Journey";
-        } else if (level <= 15) {
-            return "Intermediate Journey";
-        } else {
-            return "Advanced Journey";
-        }
+    private String deriveJourneyLabel(int level, Locale locale) {
+        String key = level <= 5 ? "journey.beginner"
+                : level <= 15 ? "journey.intermediate"
+                  : "journey.advanced";
+        return messageSource.getMessage(key, null, locale);
     }
 }
