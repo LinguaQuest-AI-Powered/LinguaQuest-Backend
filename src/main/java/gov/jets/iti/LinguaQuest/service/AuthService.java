@@ -13,6 +13,7 @@ import gov.jets.iti.LinguaQuest.repository.LanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.RefreshTokenRepository;
 import gov.jets.iti.LinguaQuest.repository.UserLanguageRepository;
 import gov.jets.iti.LinguaQuest.repository.UserRepository;
+import gov.jets.iti.LinguaQuest.util.EmailDomainValidator;
 import gov.jets.iti.LinguaQuest.util.JwtUtil;
 import gov.jets.iti.LinguaQuest.util.UserPrinciple;
 import jakarta.transaction.Transactional;
@@ -47,6 +48,7 @@ public class AuthService {
     private final StringRedisTemplate stringRedisTemplate;
     private final RefreshTokenService refreshTokenService;
     private final UserLanguageRepository userLanguageRepository;
+    private final EmailDomainValidator emailDomainValidator;
 
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final String RESET_TOKEN_PREFIX = "reset-token:";
@@ -54,6 +56,9 @@ public class AuthService {
 
     @Transactional
     public RegisterResponseDto register(RegisterRequestDto registerRequestDto) {
+        if (!emailDomainValidator.hasValidMxRecord(registerRequestDto.email())) {
+            throw new InvalidEmailDomainException("Email domain does not exist or cannot receive email");
+        }
         if (userRepository.existsByEmail(registerRequestDto.email())) {
             throw new EmailAlreadyExistsException("Email " + registerRequestDto.email() + " already exists");
         }
