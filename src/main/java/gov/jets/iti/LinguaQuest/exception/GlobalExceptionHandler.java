@@ -188,7 +188,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", ex.getMessage(), request);
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD", ex.getMessage(), request);
     }
 
     @ExceptionHandler(ProfileAlreadyCompletedException.class)

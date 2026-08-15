@@ -34,6 +34,8 @@ public class AIService {
     }
 
     public boolean verifyImage(MultipartFile image, String targetWord) {
+        log.info("--> [DEBUG] File: {}, Content-Type: {}, Size: {} bytes",
+                image.getOriginalFilename(), image.getContentType(), image.getSize());
         MimeType mimeType = resolveMimeType(image);
 
         Media media = new Media(mimeType, toResource(image));
