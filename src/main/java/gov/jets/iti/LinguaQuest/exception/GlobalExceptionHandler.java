@@ -4,6 +4,7 @@ import gov.jets.iti.LinguaQuest.dto.common.ErrorDetails;
 import gov.jets.iti.LinguaQuest.dto.common.ErrorResponse;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailNotFoundException;
 import gov.jets.iti.LinguaQuest.exception.auth.EmailAlreadyExistsException;
+import gov.jets.iti.LinguaQuest.exception.auth.InvalidEmailDomainException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidFirebaseTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.InvalidResetTokenException;
 import gov.jets.iti.LinguaQuest.exception.auth.RefreshTokenExpiredException;
@@ -94,6 +95,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidEmailDomainException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidEmailDomain(InvalidEmailDomainException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_EMAIL_DOMAIN", ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)
