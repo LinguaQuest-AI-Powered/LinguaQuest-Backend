@@ -348,9 +348,9 @@ The API is documented using the **OpenAPI** specification and tested with **Post
 
 | Name | GitHub |
 |---|---|
-| Adham Khaled | @adhamkhaled312 |
-| Ahmed Abdelrahman | @iiiAhmed |
-| Ahmed Khaled | @Ahmed-Khaled-Abdelmaksod |
+| Adham Khaled | [@adhamkhaled312](https://github.com/adhamkhaled312) |
+| Ahmed Abdelrahman | [@iiiAhmed](https://github.com/iiiAhmed) |
+| Ahmed Khaled | [@Ahmed-Khaled-Abdelmaksod](https://github.com/Ahmed-Khaled-Abdelmaksod) |
 
 ---
 
