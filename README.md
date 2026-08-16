@@ -346,12 +346,11 @@ The API is documented using the **OpenAPI** specification and tested with **Post
 
 <!-- Add team members below -->
 
-| Name | Role | GitHub |
-|---|---|---|
-| <!-- Name --> | <!-- Role --> | <!-- @github --> |
-| <!-- Name --> | <!-- Role --> | <!-- @github --> |
-| <!-- Name --> | <!-- Role --> | <!-- @github --> |
-| <!-- Name --> | <!-- Role --> | <!-- @github --> |
+| Name | GitHub |
+|---|---|
+| Adham Khaled | @adhamkhaled312 |
+| Ahmed Abdelrahman | @iiiAhmed |
+| Ahmed Khaled | @Ahmed-Khaled-Abdelmaksod |
 
 ---
 
