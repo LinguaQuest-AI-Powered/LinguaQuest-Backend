@@ -33,16 +33,19 @@ public class UserService {
     }
 
     /**
-     * Purge unverified accounts older than 24 hours daily at 3:30 AM.
+     * Purge unverified accounts older than 24 hours daily at 3:45 AM (Africa/Cairo time).
      */
-    @Scheduled(cron = "0 30 3 * * ?")
+    @Scheduled(cron = "0 45 3 * * ?", zone = "Africa/Cairo")
     @Transactional
     public void purgeUnverifiedAccounts() {
+        log.info("Starting unverified accounts purge job...");
         LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
         List<User> unverifiedUsers = userRepository.findByIsVerifiedFalseAndCreatedAtBefore(cutoff);
         if (!unverifiedUsers.isEmpty()) {
             userRepository.deleteAll(unverifiedUsers);
             log.info("Purged {} unverified user accounts created before {}", unverifiedUsers.size(), cutoff);
+        } else {
+            log.info("Unverified accounts purge job completed. 0 accounts needed purging.");
         }
     }
 }
