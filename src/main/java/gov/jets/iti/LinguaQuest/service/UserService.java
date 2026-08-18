@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -33,9 +34,9 @@ public class UserService {
     }
 
     /**
-     * Purge unverified accounts older than 24 hours daily at 3:45 AM (Africa/Cairo time).
+     * Purge unverified accounts older than 24 hours daily at 3:55 AM (Africa/Cairo time).
      */
-    @Scheduled(cron = "0 45 3 * * ?", zone = "Africa/Cairo")
+    @Scheduled(cron = "0 55 3 * * ?", zone = "Africa/Cairo")
     @Transactional
     public void purgeUnverifiedAccounts() {
         log.info("Starting unverified accounts purge job...");
