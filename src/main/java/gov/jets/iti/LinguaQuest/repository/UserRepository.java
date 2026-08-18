@@ -27,9 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.isVerified = true WHERE u.email = :email")
     void markEmailVerified(@Param("email") String email);
 
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.isVerified = false AND u.createdAt < :cutoff")
-    int deleteUnverifiedUsersOlderThan(@Param("cutoff") LocalDateTime cutoff);
+    List<User> findByIsVerifiedFalseAndCreatedAtBefore(LocalDateTime cutoff);
 
     @Query("""
         SELECT u
